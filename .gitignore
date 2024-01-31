@@ -30,3 +30,11 @@
 *.exe
 *.out
 *.app
+
+# Other files 
+.pdf 
+.png
+.jpg
+.gif
+.txt
+.dat
