@@ -1,4 +1,4 @@
-# Hans A. Winther (2020) (hans.a.winther@gmail.com)
+# Makefile for project in AST5220
 
 SHELL := /bin/bash
 
@@ -34,7 +34,8 @@ C = -O3 -g $(OPTIONS)
 
 #=======================================================
 
-VPATH=src/
+# Check both src and include for dependencies
+VPATH=src/ : include/  
 TARGETS := cmb
 all: $(TARGETS)
 
@@ -42,15 +43,15 @@ all: $(TARGETS)
 OBJS = Main.o Utils.o BackgroundCosmology.o RecombinationHistory.o Perturbations.o PowerSpectrum.o Spline.o ODESolver.o
 
 # DEPENDENCIES
-Main.o                  : include/BackgroundCosmology.h include/RecombinationHistory.h include/Perturbations.h include/PowerSpectrum.h
-Spline.o                : include/Spline.h
-ODESolver.o             : include/ODESolver.h
-Utils.o                 : include/Utils.h include/Spline.h include/ODESolver.h
-BackgroundCosmology.o   : include/BackgroundCosmology.h include/Utils.h include/Spline.h include/ODESolver.h
-RecombinationHistory.o  : include/RecombinationHistory.h include/BackgroundCosmology.h
-Perturbations.o         : include/Perturbations.h include/BackgroundCosmology.h include/RecombinationHistory.h
-PowerSpectrum.o         : include/PowerSpectrum.h include/BackgroundCosmology.h include/RecombinationHistory.h include/Perturbations.h
-Examples.o              : include/Utils.h include/Spline.h include/ODESolver.h
+Main.o                  : BackgroundCosmology.h RecombinationHistory.h Perturbations.h PowerSpectrum.h
+Spline.o                : Spline.h
+ODESolver.o             : ODESolver.h
+Utils.o                 : Utils.h Spline.h ODESolver.h
+BackgroundCosmology.o   : BackgroundCosmology.h Utils.h Spline.h ODESolver.h
+RecombinationHistory.o  : RecombinationHistory.h BackgroundCosmology.h
+Perturbations.o         : Perturbations.h BackgroundCosmology.h RecombinationHistory.h
+PowerSpectrum.o         : PowerSpectrum.h BackgroundCosmology.h RecombinationHistory.h Perturbations.h
+Examples.o              : Utils.h Spline.h ODESolver.h
 
 examples: Examples.o Utils.o Spline.o ODESolver.o
 	${CC} -o $@ $^ $C $(INC) $(LIBS)
