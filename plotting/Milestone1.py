@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 # results_supernovafitting = np.loadtxt('/home/antonabr/AST5220/data/results_supernovafitting.txt')
 
 # Windows
-supernovadata = np.loadtxt('\Users\anton\OneDrive\Skrivebord\Python\AST5220\data\supernovadata.txt')
-results_supernovafitting = np.loadtxt('C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data\results_supernovafitting.txt')
+supernovadata = open(r"Users\anton\OneDrive\Skrivebord\Python\AST5220\data\supernovadata.txt")
+results_supernovafitting = np.loadtxt(r'C:/Users\anton\OneDrive\Skrivebord\Python\AST5220\data\results_supernovafitting.txt')
 
 data = np.loadtxt('/home/antonabr/AST5220/data/cosmology.txt')
 
