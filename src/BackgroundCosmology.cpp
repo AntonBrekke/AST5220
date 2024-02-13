@@ -201,6 +201,10 @@ double BackgroundCosmology::eta_of_x(double x) const{
   return eta_of_x_spline(x);
 }
 
+double BackgroundCosmology::detadx_of_x(double x) const{
+  return eta_of_x_spline.deriv_x(x);
+}
+
 double BackgroundCosmology::t_of_x(double x) const{
   return t_of_x_spline(x);
 }
@@ -261,6 +265,7 @@ void BackgroundCosmology::output(const std::string filename) const{
   auto print_data = [&] (const double x) {
     fp << x                  << " ";
     fp << eta_of_x(x)        << " ";
+    fp << detadx_of_x(x)        << " ";
     fp << t_of_x(x)          << " ";
     fp << Hp_of_x(x)         << " ";
     fp << dHpdx_of_x(x)      << " ";
