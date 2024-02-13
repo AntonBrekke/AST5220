@@ -166,15 +166,15 @@ void mcmc_fit_to_supernova_data(std::string supernovadata_filename, std::string 
       parameters = new_parameters;
 
       // Write sample to file and screen
-      std::cout << "#          chi2            h           OmegaM           OmegaK               Acceptrate\n";
-      std::cout << std::setw(15) << chi2 << " ";
+      // std::cout << "#          chi2            h           OmegaM           OmegaK               Acceptrate\n";
+      // std::cout << std::setw(15) << chi2 << " ";
       out       << std::setw(15) << chi2 << " ";
       for(int i = 0; i < nparam; i++){
-        std::cout << std::setw(15) << parameters[i] << " ";
+        // std::cout << std::setw(15) << parameters[i] << " ";
         out << std::setw(15) << parameters[i] << " ";
       }
       out << "\n";
-      std::cout << std::setw(15) << " " << nsample/double(steps)*100.0 << "%\n";
+      // std::cout << std::setw(15) << " " << nsample/double(steps)*100.0 << "%\n";
       
       // Record new best-fit 
       if(chi2 < chi2_min){

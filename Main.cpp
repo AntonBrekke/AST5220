@@ -8,6 +8,10 @@
 int main(int argc, char **argv){
   Utils::StartTiming("Everything");
 
+  // Control what should run 
+  bool output = true;
+  bool supernovafit = true; 
+
   //=========================================================================
   // Parameters
   //=========================================================================
@@ -34,18 +38,42 @@ int main(int argc, char **argv){
 
   // Set up and solve the background
   BackgroundCosmology cosmo(h, OmegaB, OmegaCDM, OmegaK, Neff, TCMB);
+
+  Utils::StartTiming("Solve");
   cosmo.solve();
   cosmo.info();
+  Utils::EndTiming("Solve");
   
-  // Output background evolution quantities
-  cosmo.output("cosmology.txt");
-
   // Do the supernova fits. Uncomment when you are ready to run this
   // Make sure you read the comments on the top of src/SupernovaFitting.h
   // mcmc_fit_to_supernova_data("data/supernovadata.txt", "results_supernovafitting.txt");
 
-  // Remove when module is completed
-  return 0;
+  if (output){
+    // Output background evolution quantities
+    Utils::StartTiming("Output");
+    cosmo.output("data/cosmology.txt");
+
+    // Output best fit values
+    // BackgroundCosmology bestFit(0.702, 0.05, 0.209, 0.067, Neff, TCMB);
+    // Utils::StartTiming("Solve best params");
+    // bestFit.solve();
+    // bestFit.info();
+    // bestFit.output("data/bestFitBackground.txt");
+    // Utils::EndTiming("Solve best params");
+    // Utils::EndTiming("Output background");
+
+    Utils::EndTiming("Output");
+  }
+
+  if (supernovafit){
+    Utils::StartTiming("SupernovaFit");
+    mcmc_fit_to_supernova_data("data/supernovadata.txt", "data/results_supernovafitting.txt");
+    Utils::EndTiming("SupernovaFit");
+  }
+
+  // return 0;
+
+  
 
   //=========================================================================
   // Module II
