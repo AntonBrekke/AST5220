@@ -3,15 +3,17 @@ import matplotlib
 # matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt 
 
+Unix_path = r'/home/antonabr/AST5220/data'
+Windows_path = r'C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data'
 # Unix
-# supernovadata = np.loadtxt('/home/antonabr/AST5220/data/supernovadata.txt')
-# results_supernovafitting = np.loadtxt('/home/antonabr/AST5220/data/results_supernovafitting.txt')
+supernovadata = np.loadtxt(fr'{Unix_path}' + r'\supernovadata.txt')
+results_supernovafitting = np.loadtxt(fr'{Unix_path}' + r'\results_supernovafitting.txt')
+data = np.loadtxt(fr'{Unix_path}' + r'\cosmology.txt')
 
 # Windows
-supernovadata = np.loadtxt('\Users\anton\OneDrive\Skrivebord\Python\AST5220\data\supernovadata.txt')
-results_supernovafitting = np.loadtxt('C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data\results_supernovafitting.txt')
-
-data = np.loadtxt('/home/antonabr/AST5220/data/cosmology.txt')
+supernovadata = np.loadtxt(fr'{Windows_path}' + r'\supernovadata.txt')
+results_supernovafitting = np.loadtxt(fr'{Windows_path}' + r'\results_supernovafitting.txt')
+data = np.loadtxt(fr'{Windows_path}' + r'\cosmology.txt')
 
 x = data[:, 0]
 eta_of_x = data[:, 1]
