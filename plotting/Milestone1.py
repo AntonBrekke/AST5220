@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 Unix_path = r'/home/antonabr/AST5220/data'
 Windows_path = r'C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data'
+
 # Unix
 supernovadata = np.loadtxt(fr'{Unix_path}' + r'\supernovadata.txt')
 results_supernovafitting = np.loadtxt(fr'{Unix_path}' + r'\results_supernovafitting.txt')
