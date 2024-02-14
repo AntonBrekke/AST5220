@@ -12,9 +12,9 @@ results_supernovafitting = np.loadtxt(fr'{Unix_path}' + r'\results_supernovafitt
 data = np.loadtxt(fr'{Unix_path}' + r'\cosmology.txt')
 
 # Windows
-supernovadata = np.loadtxt(fr'{Windows_path}' + r'\supernovadata.txt')
-results_supernovafitting = np.loadtxt(fr'{Windows_path}' + r'\results_supernovafitting.txt')
-data = np.loadtxt(fr'{Windows_path}' + r'\cosmology.txt')
+# supernovadata = np.loadtxt(fr'{Windows_path}' + r'\supernovadata.txt')
+# results_supernovafitting = np.loadtxt(fr'{Windows_path}' + r'\results_supernovafitting.txt')
+# data = np.loadtxt(fr'{Windows_path}' + r'\cosmology.txt')
 
 x = data[:, 0]
 eta_of_x = data[:, 1]
