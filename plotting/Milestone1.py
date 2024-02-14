@@ -1,20 +1,14 @@
 import numpy as np
-import matplotlib
-# matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt 
 
+# If I want to plot in Unix or Windows
 Unix_path = r'/home/antonabr/AST5220/data'
 Windows_path = r'C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data'
+path = Unix_path
 
-# Unix
-supernovadata = np.loadtxt(fr'{Unix_path}' + r'/supernovadata.txt')
-results_supernovafitting = np.loadtxt(fr'{Unix_path}' + r'/results_supernovafitting.txt')
-data = np.loadtxt(fr'{Unix_path}' + r'/cosmology.txt')
-
-# Windows
-# supernovadata = np.loadtxt(fr'{Windows_path}' + r'\supernovadata.txt')
-# results_supernovafitting = np.loadtxt(fr'{Windows_path}' + r'\results_supernovafitting.txt')
-# data = np.loadtxt(fr'{Windows_path}' + r'\cosmology.txt')
+supernovadata = np.loadtxt(fr'{path}' + r'/supernovadata.txt')
+results_supernovafitting = np.loadtxt(fr'{path}' + r'/results_supernovafitting.txt')
+data = np.loadtxt(fr'{path}' + r'/cosmology.txt')
 
 x = data[:, 0]
 eta_of_x = data[:, 1]
