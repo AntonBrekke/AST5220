@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt 
+import scipy.constants as scc
 
 # If I want to plot in Unix or Windows
 Unix_path = r'/home/antonabr/AST5220/data'
@@ -10,6 +11,9 @@ supernovadata = np.loadtxt(fr'{path}' + r'/supernovadata.txt')
 results_supernovafitting = np.loadtxt(fr'{path}' + r'/results_supernovafitting.txt')
 data = np.loadtxt(fr'{path}' + r'/cosmology.txt')
 
+# Constants
+c = scc.c
+
 x = data[:, 0]
 eta_of_x = data[:, 1]
 detadx_of_x = data[:, 2]
@@ -19,7 +23,6 @@ Hp_of_x = data[:, 4]
 fig = plt.figure()
 ax = fig.add_subplot()
 
-Hp_plot = ax.plot(x, detadx_of_x*Hp_of_x)
-# ax.set_yscale('log')
+Hp_plot = ax.plot(x, eta_of_x*Hp_of_x / c)
 plt.savefig('Hp_plot.png')
 plt.show()

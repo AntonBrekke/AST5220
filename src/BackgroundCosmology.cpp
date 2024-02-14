@@ -265,7 +265,7 @@ void BackgroundCosmology::output(const std::string filename) const{
   auto print_data = [&] (const double x) {
     fp << x                  << " ";
     fp << eta_of_x(x)        << " ";
-    fp << detadx_of_x(x)        << " ";
+    fp << detadx_of_x(x)     << " ";
     fp << t_of_x(x)          << " ";
     fp << Hp_of_x(x)         << " ";
     fp << dHpdx_of_x(x)      << " ";
