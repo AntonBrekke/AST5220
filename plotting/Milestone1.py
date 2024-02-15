@@ -14,15 +14,18 @@ data = np.loadtxt(fr'{path}' + r'/cosmology.txt')
 # Constants
 c = scc.c
 
-x = data[:, 0]
-eta_of_x = data[:, 1]
-detadx_of_x = data[:, 2]
-t_of_x = data[:, 3]
-Hp_of_x = data[:, 4]
+x, eta_of_x, detadx_of_x, t_of_x, Hp_of_x, dHpdx_of_x, OmegaB, OmegaCDM, \
+OmegaLambda, OmegaR, OmegaNu, OmegaK, luminosity_distance_of_x = data.T
+
+x_start = -15
+x_axis_index = np.where(x >= x_start)
 
 fig = plt.figure()
 ax = fig.add_subplot()
 
-Hp_plot = ax.plot(x, eta_of_x*Hp_of_x / c)
-plt.savefig('Hp_plot.png')
+ax.plot(x[x_axis_index], (eta_of_x*Hp_of_x / c)[x_axis_index])
+# ax.plot(x, OmegaR + OmegaNu)
+# ax.plot(x, OmegaB + OmegaCDM)
+# ax.plot(x, OmegaLambda)
+# plt.savefig('Hp_plot.png')
 plt.show()

@@ -255,7 +255,7 @@ void BackgroundCosmology::info() const{
 // Output some data to file
 //====================================================
 void BackgroundCosmology::output(const std::string filename) const{
-  const double x_min = -10.0;
+  const double x_min = -20.0;
   const double x_max =  0.0;
   const int    n_pts =  100;
   
