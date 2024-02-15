@@ -9,7 +9,7 @@ int main(int argc, char **argv){
   Utils::StartTiming("Everything");
 
   // Control what should run 
-  bool output = true;
+  bool output = false;
   bool supernovafit = true; 
 
   //=========================================================================
@@ -54,7 +54,8 @@ int main(int argc, char **argv){
     cosmo.output("data/cosmology.txt");
 
     // Output best fit values
-    // BackgroundCosmology bestFit(0.702, 0.05, 0.209, 0.067, Neff, TCMB);
+    // Minimum chi^2 found chi^2 = 29.2786 h = 0.70164 OmegaM = 0.255336 (OmegaB + OmegaCDM) OmegaK = 0.0766094
+    // BackgroundCosmology bestFit(0.702, OmegaB, 0.255 - OmegaB, 0.077, Neff, TCMB);
     // Utils::StartTiming("Solve best params");
     // bestFit.solve();
     // bestFit.info();
@@ -71,7 +72,7 @@ int main(int argc, char **argv){
     Utils::EndTiming("SupernovaFit");
   }
 
-  // return 0;
+  return 0;
 
   
 
