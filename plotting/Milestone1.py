@@ -17,7 +17,7 @@ c = scc.c
 x, eta_of_x, detadx_of_x, t_of_x, Hp_of_x, dHpdx_of_x, OmegaB, OmegaCDM, \
 OmegaLambda, OmegaR, OmegaNu, OmegaK, luminosity_distance_of_x = data.T
 
-x_start = -15
+x_start = -14
 x_axis_index = np.where(x >= x_start)
 
 fig = plt.figure()
