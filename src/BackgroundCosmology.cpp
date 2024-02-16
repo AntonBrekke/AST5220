@@ -61,12 +61,14 @@ void BackgroundCosmology::solve(){
     return GSL_SUCCESS;
   };
   
+
+
   // The ODE for dt/dx
   ODEFunction dtdx = [&](double x, const double *t, double *dtdx){
     //=============================================================================
     // Set the rhs of the dtdx ODE
     //=============================================================================
-    dtdx[0] = 1. / Hp_of_x(x);
+    dtdx[0] = 1. / H_of_x(x);
     return GSL_SUCCESS;
   };
 
@@ -78,13 +80,13 @@ void BackgroundCosmology::solve(){
 
   // Solve using ODESolver 
   ODESolver ODE_eta_of_x; 
-  ODE_eta_of_x.solve(detadx, x_array, eta_i);
-  Vector eta_array = ODE_eta_of_x.get_data_by_component(0); 
+    ODE_eta_of_x.solve(detadx, x_array, eta_i);
+    Vector eta_array = ODE_eta_of_x.get_data_by_component(0); 
   eta_of_x_spline.create(x_array, eta_array, "eta_of_x");
 
   ODESolver ODE_t_of_x; 
-  ODE_t_of_x.solve(dtdx, x_array, t_i);
-  Vector t_array = ODE_t_of_x.get_data_by_component(0);
+    ODE_t_of_x.solve(dtdx, x_array, t_i);
+    Vector t_array = ODE_t_of_x.get_data_by_component(0);
   t_of_x_spline.create(x_array, t_array, "t_of_x");
 
   // Utils::EndTiming("Eta");
@@ -171,9 +173,9 @@ double BackgroundCosmology::get_r_of_x(double x) const{
   double K = H0*Chi / Constants.c;
   if (abs(OmegaK) < 1e-5) return Chi;
   
-  if (OmegaK < 0) return Chi * sin(sqrt(abs(OmegaK))*K) / (sqrt(OmegaK)*K);
+  if (OmegaK < 0) return Chi * sin(sqrt(abs(OmegaK))*K) / (sqrt(abs(OmegaK))*K);
 
-  else return Chi * sinh(sqrt(abs(OmegaK))*K) / (sqrt(OmegaK)*K);
+  else return Chi * sinh(sqrt(abs(OmegaK))*K) / (sqrt(abs(OmegaK))*K);
 }
     
 double BackgroundCosmology::get_luminosity_distance_of_x(double x) const{
@@ -256,8 +258,8 @@ void BackgroundCosmology::info() const{
 //====================================================
 void BackgroundCosmology::output(const std::string filename) const{
   const double x_min = -20.0;
-  const double x_max =  0.0;
-  const int    n_pts =  100;
+  const double x_max =  5.0;
+  const int    n_pts =  1000;
   
   Vector x_array = Utils::linspace(x_min, x_max, n_pts);
 
