@@ -1,8 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt 
+import seaborn as sns 
 import scipy.constants as scc
 
-# plt.style.use('seaborn-v0_8')
+# Only want seaborn-v0_8 colors 
+seaborn_color = sns.color_palette('deep')
+seaborn_color[1], seaborn_color[3] = seaborn_color[3], seaborn_color[1]
+seaborn_color[1], seaborn_color[2] = seaborn_color[2], seaborn_color[1]
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=seaborn_color) 
 
 # If I want to plot in Unix or Windows
 Unix_path = r'/home/antonabr/AST5220/data'
@@ -51,7 +56,7 @@ class make_plot:
         self.x_axis_index = np.logical_and(x >= self.x_start, x <= self.x_end)
         self.ax.plot(x[self.x_axis_index], (data)[self.x_axis_index], label=label, **kwargs)
         if label != '':
-            self.ax.legend()
+            self.ax.legend(prop={'size': 16})
         # Call show when ready 
 
     def hist(self, data, bins, label='', density=False, use_prev_fig=False):
@@ -66,7 +71,7 @@ class make_plot:
         for color, patch in zip(cmap, patches):
             plt.setp(patch, 'facecolor', color)
         if label != '':
-            self.ax.legend()
+            self.ax.legend(prop={'size': 16})
         # Call show when ready
 
     def format_plot(self, xlabel='', ylabel='', scale='linear'):
@@ -187,9 +192,9 @@ def plot_posterior_PDF_OmegaLambda():
 # plot_conformal_Hubble()
 # plot_conformal_time_pr_c()
 # plot_time()
-# plot_densities()
-# plot_luminosity_distance_of_z()
-# plot_supernovadata_MCMC_fits()
+plot_densities()
+plot_luminosity_distance_of_z()
+plot_supernovadata_MCMC_fits()
 plot_posterior_PDF_Hubble_param()
 plot_posterior_PDF_OmegaLambda()
 
