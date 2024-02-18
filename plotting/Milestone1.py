@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt 
 import scipy.constants as scc
 
+# plt.style.use('seaborn-v0_8')
+
 # If I want to plot in Unix or Windows
 Unix_path = r'/home/antonabr/AST5220/data'
 Windows_path = r'C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data'
@@ -34,12 +36,14 @@ pr_second_to_km_pr_second_pr_Mparsec = 100e3 / (parsec*1e6)
 
 # Make small class to not copy too much code 
 class make_plot:
-    def __init__(self, x_start=0, x_end=1, title=''):
+    def __init__(self, x_start=None, x_end=None, title=''):
         self.x_start = x_start
         self.x_end = x_end
         self.title = title 
 
     def plot(self, x, data, use_prev_fig=False, label='', **kwargs):
+        if (self.x_start) is None: self.x_start = x[0]
+        if (self.x_end) is None: self.x_end = x[-1]
         if use_prev_fig == False:
             self.fig = plt.figure()
             self.ax = self.fig.add_subplot()
@@ -56,7 +60,11 @@ class make_plot:
             self.fig = plt.figure()
             self.ax = self.fig.add_subplot()
             self.ax.set_title(self.title, fontsize=16)
-        self.ax.hist(self.bins[:-1], self.bins, weights=self.counts, density=density)
+        n, bins, patches = self.ax.hist(self.bins[:-1], self.bins, weights=self.counts, density=density)
+        cm = plt.get_cmap('RdYlBu_r')
+        cmap = cm((n - np.min(n))/(np.max(n) - np.min(n)))
+        for color, patch in zip(cmap, patches):
+            plt.setp(patch, 'facecolor', color)
         if label != '':
             self.ax.legend()
         # Call show when ready
@@ -129,7 +137,6 @@ def plot_luminosity_distance_of_z():
 
 def plot_supernovadata_MCMC_fits():
     chi2_min = np.min(chi2)
-    print(chi2_min)
 
     chi2_1sigma = np.where((chi2 - chi2_min) < 3.53)    # 1 sigma
     chi2_2sigma = np.where((chi2 - chi2_min) < 8.02)    # 2 sigma
@@ -139,6 +146,7 @@ def plot_supernovadata_MCMC_fits():
     OmegaLambda_selected_1sigma = (1 - (OmegaM + OmegaK))[chi2_1sigma]
     OmegaLambda_selected_2sigma = (1 - (OmegaM + OmegaK))[chi2_2sigma]
 
+    line = -1*np.linspace(0, 1, len(OmegaLambda_selected_2sigma)) + 1
     plt.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$')
     plt.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$')
     plt.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
@@ -155,16 +163,33 @@ def plot_posterior_PDF_Hubble_param():
     sigma = np.std(h)
     mu = np.mean(h)
     gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
-    posterior_H0_pdf.plot(bins, gaussian, color='r', lw=2, use_prev_fig=True)
+    posterior_H0_pdf.plot(bins, gaussian, color='k', lw=2.5, use_prev_fig=True)
+    posterior_H0_pdf.format_plot()
+
+    plt.show()
+
+def plot_posterior_PDF_OmegaLambda():
+    OmegaLambda = 1 - (OmegaM + OmegaK)
+    posterior_OmegaLambda_pdf = make_plot()
+    posterior_OmegaLambda_pdf.hist(OmegaLambda, bins=75, density=True)
+    bins = posterior_OmegaLambda_pdf.bins
+
+    sigma = np.std(OmegaLambda)
+    mu = np.mean(OmegaLambda)
+    gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
+    posterior_OmegaLambda_pdf.plot(bins, gaussian, color='k', lw=2.5, use_prev_fig=True)
+    posterior_OmegaLambda_pdf.format_plot()
 
     plt.show()
 
 # Control unit for plotting 
-plot_demonstrate_code()
-plot_conformal_Hubble()
-plot_conformal_time_pr_c()
-plot_time()
-plot_densities()
-plot_luminosity_distance_of_z()
-plot_supernovadata_MCMC_fits()
+# plot_demonstrate_code()
+# plot_conformal_Hubble()
+# plot_conformal_time_pr_c()
+# plot_time()
+# plot_densities()
+# plot_luminosity_distance_of_z()
+# plot_supernovadata_MCMC_fits()
 plot_posterior_PDF_Hubble_param()
+plot_posterior_PDF_OmegaLambda()
+
