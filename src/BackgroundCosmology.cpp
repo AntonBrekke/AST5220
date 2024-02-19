@@ -119,7 +119,7 @@ double BackgroundCosmology::dHpdx_of_x(double x) const{
   //=============================================================================
   // Take derivative of the above Hp_of_x.
   //=============================================================================
-  double dHpdx = 0.5*pow(H0 / H_of_x(x), 2) * (OmegaLambda*exp(x) - 2*(OmegaR + OmegaNu)*exp(-3*x) - (OmegaB + OmegaCDM)*exp(-2*x));
+  double dHpdx = 0.5*pow(H0, 2) / H_of_x(x) * (2*OmegaLambda*exp(x) - 2*(OmegaR + OmegaNu)*exp(-3*x) - (OmegaB + OmegaCDM)*exp(-2*x));
 
   return dHpdx;
 }
@@ -130,10 +130,12 @@ double BackgroundCosmology::ddHpddx_of_x(double x) const{
   //=============================================================================
   double A = OmegaR + OmegaNu;
   double B = OmegaB + OmegaCDM;
-  double dHdx = 0.5*pow(H0, 2) / H_of_x(x) * (-4*A*exp(-4*x) - 3*B*exp(-3*x) - 2*OmegaK*exp(-2*x));
-  double first_term = 0.5*pow(H0 / H_of_x(x), 2) * (OmegaLambda*exp(x) + 6*A*exp(-3*x) + 2*B*exp(-2*x));
-  double second_term = pow(H0, 2) / pow(H_of_x(x), 3) * dHdx*(OmegaLambda*exp(x) - 2*A*exp(-3*x) - B*exp(-2*x));
-  double ddHpddx = first_term - second_term; 
+  double C = OmegaK;
+  double D = OmegaLambda;
+  double first_term = 0.5 * pow(H0, 2) / H_of_x(x) * (2*D*exp(x) + 6*A*exp(-3*x) + 2*B*exp(-2*x));
+  double second_term = 0.25 * pow(H0, 4) / pow(H_of_x(x), 3) * (4*A*exp(-4*x)
+                     + 3*B*exp(-3*x) + 2*C*exp(-2*x)) * (2*D*exp(x) - 2*A*exp(-3*x) - B*exp(-2*x));
+  double ddHpddx = first_term + second_term; 
 
   return ddHpddx;
 }
@@ -265,19 +267,19 @@ void BackgroundCosmology::output(const std::string filename) const{
 
   std::ofstream fp(filename.c_str());
   auto print_data = [&] (const double x) {
-    fp << x                  << " ";
-    fp << eta_of_x(x)        << " ";
-    fp << detadx_of_x(x)     << " ";
-    fp << t_of_x(x)          << " ";
-    fp << Hp_of_x(x)         << " ";
-    fp << dHpdx_of_x(x)      << " ";
-    fp << ddHpddx_of_x(x)    << " ";
-    fp << get_OmegaB(x)      << " ";
-    fp << get_OmegaCDM(x)    << " ";
-    fp << get_OmegaLambda(x) << " ";
-    fp << get_OmegaR(x)      << " ";
-    fp << get_OmegaNu(x)     << " ";
-    fp << get_OmegaK(x)      << " ";
+    fp << x                  << " ";  // 0
+    fp << eta_of_x(x)        << " ";  // 1
+    fp << detadx_of_x(x)     << " ";  // 2
+    fp << t_of_x(x)          << " ";  // 3
+    fp << Hp_of_x(x)         << " ";  // 4
+    fp << dHpdx_of_x(x)      << " ";  // 5
+    fp << ddHpddx_of_x(x)    << " ";  // 6
+    fp << get_OmegaB(x)      << " ";  // 7
+    fp << get_OmegaCDM(x)    << " ";  // 8
+    fp << get_OmegaLambda(x) << " ";  // 9
+    fp << get_OmegaR(x)      << " ";  // 10
+    fp << get_OmegaNu(x)     << " ";  // 11
+    fp << get_OmegaK(x)      << " ";  // 12
     fp << get_luminosity_distance_of_x(x)      << " ";
     fp <<"\n";
   };

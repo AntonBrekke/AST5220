@@ -38,7 +38,7 @@ Gyr_to_seconds = 365*24*60*60*1e9
 pr_second_to_km_pr_second_pr_Mparsec = 100e3 / (parsec*1e6)        
 
 
-# Make small class to not copy too much code 
+# Make small class to not copy too much code. Not meant to be as general as possible
 class make_plot:
     def __init__(self, x_start=None, x_end=None, title=''):
         self.x_start = x_start
@@ -74,8 +74,8 @@ class make_plot:
         # Call show when ready
 
     def format_plot(self, xlabel='', ylabel='', scale='linear'):
-        self.ax.set_xlabel(xlabel)
-        self.ax.set_ylabel(ylabel)
+        self.ax.set_xlabel(xlabel, fontsize=16)
+        self.ax.set_ylabel(ylabel, fontsize=16)
         self.ax.set_yscale(scale)
         self.ax.set_xlim(self.x_start, self.x_end)
         self.fig.tight_layout()
@@ -83,40 +83,43 @@ class make_plot:
 
 # Call all plots 
 def plot_demonstrate_code():
-    plot_dHpdx_pr_Hp = make_plot(-12, 0)
-    plot_dHpdx_pr_Hp.plot(x, dHpdx_of_x/Hp_of_x*pr_second_to_km_pr_second_pr_Mparsec)
-    plot_dHpdx_pr_Hp.format_plot()
+    title = r'$\frac{\mathcal{H}^{\prime}(x)}{\mathcal{H}(x)}\;$'
+    plot_dHpdx_pr_Hp = make_plot(-12, 0,  title=title)
+    plot_dHpdx_pr_Hp.plot(x, dHpdx_of_x/Hp_of_x)
+    plot_dHpdx_pr_Hp.format_plot('x')
     plt.show()
 
-    plot_ddHpddx_pr_Hp = make_plot(-12, 0)
-    plot_ddHpddx_pr_Hp.plot(x, ddHpddx_of_x/Hp_of_x*pr_second_to_km_pr_second_pr_Mparsec)
-    plot_ddHpddx_pr_Hp.format_plot()
+    title= r'$\frac{\mathcal{H}^{\prime\prime}(x)}{\mathcal{H}(x)}\;$'
+    plot_ddHpddx_pr_Hp = make_plot(-12, 0, title=title)
+    plot_ddHpddx_pr_Hp.plot(x, ddHpddx_of_x/Hp_of_x)
+    plot_ddHpddx_pr_Hp.format_plot('x')
     plt.show()
 
-    plot_etaHp_pr_c = make_plot(-12, 0, title=r'$\frac{\eta(x)\mathcal{H}}{c}$')
+    title = r'$\frac{\eta(x)\mathcal{H}(x)}{c}\;$'
+    plot_etaHp_pr_c = make_plot(-12, 0, title=title)
     plot_etaHp_pr_c.plot(x, eta_of_x*Hp_of_x/c)
-    plot_etaHp_pr_c.format_plot()
+    plot_etaHp_pr_c.format_plot('x')
     plt.show()
 
 
 def plot_conformal_Hubble():
     plot_Hp = make_plot(-12, 0, title=r'$\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$')
     plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)
-    plot_Hp.format_plot(scale='log')
+    plot_Hp.format_plot('x', scale='log')
     plt.show()
 
 
 def plot_conformal_time_pr_c():
     plot_eta_pr_c = make_plot(-12, 0, title=r'$\frac{\eta(x)}{c}\;\left(\frac{Mpc}{c}\right)$')
     plot_eta_pr_c.plot(x, eta_of_x/(c*parsec))
-    plot_eta_pr_c.format_plot(scale='log')
+    plot_eta_pr_c.format_plot('x', scale='log')
     plt.show()
 
 
 def plot_time():
     plot_t = make_plot(-12, 0, title=r'$t(x)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds)
-    plot_t.format_plot(scale='log')
+    plot_t.format_plot('x', scale='log')
     plt.show()
 
 
@@ -125,7 +128,7 @@ def plot_densities():
     plot_densities.plot(x, OmegaR + OmegaNu, label=r'$\Omega_R + \Omega_\nu$')
     plot_densities.plot(x, OmegaB + OmegaCDM, label=r'$\Omega_B + \Omega_{CDM}$', use_prev_fig=True)
     plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$', use_prev_fig=True)
-    plot_densities.format_plot()
+    plot_densities.format_plot('x')
     plt.show()
 
 
@@ -133,8 +136,11 @@ def plot_luminosity_distance_of_z():
     fig = plt.figure()
     ax = fig.add_subplot()
     ax.set_title('')
-    ax.errorbar(z, luminosity_distance_of_z, yerr=Error, ecolor='r', capsize=4, color="k")
+    ax.errorbar(z, luminosity_distance_of_z, yerr=Error, ecolor='r', capsize=4, color="k", label=r'd_L')
+    ax.set_xlabel('z', fontsize=16)
+    ax.set_ylabel(r'd_L', fontsize=16)
 
+    ax.legend(prop={'size': 16})
     fig.tight_layout()
     plt.show()
 
@@ -154,6 +160,9 @@ def plot_supernovadata_MCMC_fits():
     plt.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$')
     plt.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$')
     plt.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
+
+    plt.xlabel(r'$\Omega_{M}$', fontsize=16)
+    plt.ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
     plt.legend()
     plt.show()
 
@@ -187,10 +196,10 @@ def plot_posterior_PDF_OmegaLambda():
     plt.show()
 
 # Control unit for plotting 
-# plot_demonstrate_code()
-# plot_conformal_Hubble()
-# plot_conformal_time_pr_c()
-# plot_time()
+plot_demonstrate_code()
+plot_conformal_Hubble()
+plot_conformal_time_pr_c()
+plot_time()
 plot_densities()
 plot_luminosity_distance_of_z()
 plot_supernovadata_MCMC_fits()
