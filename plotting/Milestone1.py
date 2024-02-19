@@ -3,11 +3,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns 
 import scipy.constants as scc
 
-# Only want seaborn-v0_8 colors 
-seaborn_color = sns.color_palette('deep')
-seaborn_color[1], seaborn_color[3] = seaborn_color[3], seaborn_color[1]
-seaborn_color[1], seaborn_color[2] = seaborn_color[2], seaborn_color[1]
-plt.rcParams['axes.prop_cycle'] = plt.cycler(color=seaborn_color) 
+# Changing standardcolor cycle to preferred cycle  
+colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
 
 # If I want to plot in Unix or Windows
 Unix_path = r'/home/antonabr/AST5220/data'
@@ -66,7 +65,7 @@ class make_plot:
             self.ax = self.fig.add_subplot()
             self.ax.set_title(self.title, fontsize=16)
         n, bins, patches = self.ax.hist(self.bins[:-1], self.bins, weights=self.counts, density=density)
-        cm = plt.get_cmap('RdYlBu_r')
+        cm = plt.get_cmap('Spectral_r')
         cmap = cm((n - np.min(n))/(np.max(n) - np.min(n)))
         for color, patch in zip(cmap, patches):
             plt.setp(patch, 'facecolor', color)
