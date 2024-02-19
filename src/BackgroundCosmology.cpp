@@ -280,7 +280,8 @@ void BackgroundCosmology::output(const std::string filename) const{
     fp << get_OmegaR(x)      << " ";  // 10
     fp << get_OmegaNu(x)     << " ";  // 11
     fp << get_OmegaK(x)      << " ";  // 12
-    fp << get_luminosity_distance_of_x(x)      << " ";
+    fp << get_luminosity_distance_of_x(x)      << " "; // 13
+    fp << get_z_of_x(x)      << " ";  // 14
     fp <<"\n";
   };
   std::for_each(x_array.begin(), x_array.end(), print_data);
