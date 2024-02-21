@@ -54,8 +54,8 @@ int main(int argc, char **argv){
     cosmo.output("data/cosmology.txt");
 
     // Output best fit values
-    // Minimum chi^2 found chi^2 = 29.2786 h = 0.70164 OmegaM = 0.255336 (OmegaB + OmegaCDM) OmegaK = 0.0766094
-    BackgroundCosmology bestFit(0.702, OmegaB, 0.255 - OmegaB, 0.077, Neff, TCMB);
+    // Minimum chi^2 found chi^2 = 29.2811 h = 0.70189 OmegaM = 0.25932 (OmegaB + OmegaCDM) OmegaK = 0.0673887
+    BackgroundCosmology bestFit(0.702, OmegaB, 0.259 - OmegaB, 0.067, Neff, TCMB);
     Utils::StartTiming("Solve best params");
     bestFit.solve();
     bestFit.info();

@@ -77,7 +77,41 @@ class make_plot:
         self.fig.tight_layout()
 # End of class 
 
+# Define constants and variables from problem 
 a = np.exp(x)       # Scaling factor instead of x may be more intuitive
+H0 = 67*pr_second_to_km_pr_second_pr_Mparsec
+TCMB0 = 2.7255
+Neff = 3.046
+OmegaR0 = 2 * np.pi**2 / 30 * (scc.k * TCMB0)**4 / (scc.hbar**3 * scc.c**5) * 8 * np.pi * scc.G / (3 * H0**2)
+OmegaNu0 = Neff * 7 / 8 * (4 / 11)**(4/3) * OmegaR0
+OmegaB0 = 0.05
+OmegaCDM0 = 0.267
+OmegaK0 = 0.0
+OmegaLambda0 = 1 - (OmegaK0 + OmegaB0 + OmegaCDM0 + OmegaR0 + OmegaNu0)
+
+A = OmegaR0 + OmegaNu0
+B = OmegaB0 + OmegaCDM0
+C = OmegaK0
+D = OmegaLambda0
+
+x_Matterdom_start = -9
+x_DEdom_start = -0.8
+
+x_Rad_index = np.where(x < x_Matterdom_start)
+x_Matter_index = np.logical_and(x > x_Matterdom_start, x < x_DEdom_start)
+x_DE_index = np.where(x > x_DEdom_start)
+
+def etaHp_R_pr_c(x):
+    # Radiation dominated
+    return np.ones(len(x))
+
+def etaHp_M_pr_c(x):
+    # Matter dominated
+    return np.exp(x_Matterdom_start - 0.5*x) + 2*(1 - np.exp(0.5*(x_Matterdom_start - x))) 
+
+def etaHp_L_pr_c(x):
+    # Dark energy dominated 
+    return np.exp(x + x_Matterdom_start) + np.exp(x - x_DEdom_start) + 2*(np.exp(x + 0.5*x_DEdom_start) - np.exp(x + 0.5*x_Matterdom_start)) - 1
 
 # Call all plots 
 def plot_demonstrate_code():
@@ -87,14 +121,22 @@ def plot_demonstrate_code():
     plot_Hp_derivatives = make_plot(title=title)
     plot_Hp_derivatives.plot(x, dHpdx_of_x/Hp_of_x, label=label_dHpdx)
     plot_Hp_derivatives.plot(x, ddHpddx_of_x/Hp_of_x, label=label_ddHpddx)
+    plot_Hp_derivatives.plot(x, np.ones(len(x)), color='k', ls=':')
+    plot_Hp_derivatives.plot(x, -np.ones(len(x)), color='k', ls=':')
+    plot_Hp_derivatives.plot(x, -1/2*np.ones(len(x)), color='k', ls=':')
+    plot_Hp_derivatives.plot(x, 1/4*np.ones(len(x)), color='k', ls=':')
 
     plot_Hp_derivatives.format_plot('x=ln(a)')
     plt.show()
 
     title = r'$\frac{\eta(x)\mathcal{H}(x)}{c}\;$'
-    plot_etaHp_pr_c = make_plot(-14, 0, title=title)
-    plot_etaHp_pr_c.plot(x, eta_of_x*Hp_of_x/c)
-    plot_etaHp_pr_c.format_plot('x=ln(a)')
+    plot_etaHp_pr_c = make_plot(title=title)
+    plot_etaHp_pr_c.plot(x, eta_of_x*Hp_of_x/c, color='k', label='Numerical', lw=2, ls='--')
+    plot_etaHp_pr_c.plot(x[x_Rad_index], etaHp_R_pr_c(x[x_Rad_index]), color='tab:red', label='Rad. dom. approx.')
+    plot_etaHp_pr_c.plot(x[x_Matter_index], etaHp_M_pr_c(x[x_Matter_index]), color='tab:orange', label='Matter dom. approx.')
+    plot_etaHp_pr_c.plot(x[x_DE_index], etaHp_L_pr_c(x[x_DE_index]), color='tab:green', label='DE dom. approx.')
+
+    plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log')
     plt.show()
 
 
@@ -123,12 +165,12 @@ def plot_time():
 
 def plot_densities():
     plot_densities = make_plot(x[0], x[-1], title=r'$\Omega_i$')
-    plot_densities.plot(x, OmegaR + OmegaNu, label=r'$\Omega_R + \Omega_\nu$')
-    plot_densities.plot(x, OmegaB + OmegaCDM, label=r'$\Omega_B + \Omega_{CDM}$')
+    plot_densities.plot(x, OmegaR + OmegaNu, label=r'$\Omega_{rel}=\Omega_R + \Omega_\nu$')
+    plot_densities.plot(x, OmegaB + OmegaCDM, label=r'$\Omega_{matter}=\Omega_B + \Omega_{CDM}$')
     plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$')
     plot_densities.format_plot('x=ln(a)')
-    plt.show()
 
+    plt.show()
 
 def plot_luminosity_distance_of_z():
     fig = plt.figure()
@@ -201,10 +243,10 @@ def plot_posterior_PDF_OmegaLambda():
     plt.show()
 
 # Control unit for plotting 
-# plot_demonstrate_code()
-# plot_conformal_Hubble()
-# plot_conformal_time_pr_c()
-# plot_time()
+plot_demonstrate_code()
+plot_conformal_Hubble()
+plot_conformal_time_pr_c()
+plot_time()
 plot_densities()
 plot_luminosity_distance_of_z()
 plot_supernovadata_MCMC_fits()
