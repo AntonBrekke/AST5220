@@ -23,9 +23,9 @@ BackgroundCosmology::BackgroundCosmology(
   // TODO: Compute OmegaR, OmegaNu, OmegaLambda, H0, ...
   //=============================================================================
   H0 = h * Constants.H0_over_h;
-  OmegaR = 2. * pow(Constants.pi, 2) / 30 * pow(Constants.k_b * TCMB, 4) / (pow(Constants.hbar, 3) 
-             * pow(Constants.c, 5)) * 8 * Constants.pi * Constants.G / (3 * pow(H0, 2));
-  OmegaNu = Neff * 7. / 8 * pow(4 / 11, 4 / 3) * OmegaR;
+  OmegaR = 2. * pow(Constants.pi, 2) / 30. * pow(Constants.k_b * TCMB, 4) / (pow(Constants.hbar, 3) 
+             * pow(Constants.c, 5)) * 8. * Constants.pi * Constants.G / (3 * pow(H0, 2));
+  OmegaNu = Neff * 7. / 8 * pow(4. / 11, 4. / 3) * OmegaR;
   OmegaLambda = 1. - (OmegaK + OmegaB + OmegaCDM + OmegaR + OmegaNu); 
 
 }
@@ -61,7 +61,15 @@ void BackgroundCosmology::solve(){
     return GSL_SUCCESS;
   };
   
+  // Initial condition for eta
+  double eta_0 = Constants.c / Hp_of_x(x_start);
+  Vector eta_i{eta_0};
 
+  // Solve using ODESolver 
+  ODESolver ODE_eta_of_x; 
+    ODE_eta_of_x.solve(detadx, x_array, eta_i);
+    Vector eta_array = ODE_eta_of_x.get_data_by_component(0); 
+  eta_of_x_spline.create(x_array, eta_array, "eta_of_x");
 
   // The ODE for dt/dx
   ODEFunction dtdx = [&](double x, const double *t, double *dtdx){
@@ -72,18 +80,11 @@ void BackgroundCosmology::solve(){
     return GSL_SUCCESS;
   };
 
-  // Initial condition for eta and t
-  double eta_0 = Constants.c / Hp_of_x(x_start);
+  // Initial condition for t
   double t_0 = 1. / (2*H_of_x(x_start));
-  Vector eta_i{eta_0};
   Vector t_i{t_0};
 
   // Solve using ODESolver 
-  ODESolver ODE_eta_of_x; 
-    ODE_eta_of_x.solve(detadx, x_array, eta_i);
-    Vector eta_array = ODE_eta_of_x.get_data_by_component(0); 
-  eta_of_x_spline.create(x_array, eta_array, "eta_of_x");
-
   ODESolver ODE_t_of_x; 
     ODE_t_of_x.solve(dtdx, x_array, t_i);
     Vector t_array = ODE_t_of_x.get_data_by_component(0);
@@ -101,7 +102,7 @@ double BackgroundCosmology::H_of_x(double x) const{
   //=============================================================================
   // Using x = log(a) with natural logarithm. 
   //=============================================================================
-  double H = H0 * sqrt((OmegaNu + OmegaR)*exp(-4*x) + (OmegaCDM + OmegaB)*exp(-3*x) + OmegaK*exp(-2*x) + OmegaLambda);
+  double H = H0 * sqrt((OmegaR + OmegaNu)*exp(-4*x) + (OmegaB + OmegaCDM)*exp(-3*x) + OmegaK*exp(-2*x) + OmegaLambda);
 
   return H;
 }
@@ -213,6 +214,10 @@ double BackgroundCosmology::t_of_x(double x) const{
   return t_of_x_spline(x);
 }
 
+double BackgroundCosmology::dtdx_of_x(double x) const{
+  return t_of_x_spline.deriv_x(x);
+}
+
 double BackgroundCosmology::get_z_of_x(double x) const{ 
   return exp(-x) - 1; 
 }
@@ -259,9 +264,9 @@ void BackgroundCosmology::info() const{
 // Output some data to file
 //====================================================
 void BackgroundCosmology::output(const std::string filename) const{
-  const double x_min = -20.0;
+  const double x_min = -18;
   const double x_max =  5.0;
-  const int    n_pts =  1000;
+  const int    n_pts =  100000;
   
   Vector x_array = Utils::linspace(x_min, x_max, n_pts);
 

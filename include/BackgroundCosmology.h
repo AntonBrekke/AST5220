@@ -58,6 +58,7 @@ class BackgroundCosmology{
     double detadx_of_x(double x) const;
     double H_of_x(double x) const;
     double t_of_x(double x) const;
+    double dtdx_of_x(double x) const;
     double Hp_of_x(double x) const;
     double dHpdx_of_x(double x) const;
     double ddHpddx_of_x(double x) const;

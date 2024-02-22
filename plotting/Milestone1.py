@@ -68,52 +68,51 @@ class make_plot:
             self.ax.legend(prop={'size': 12})
         # Call show when ready
 
-    def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear'):
+    def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', **scalekwargs):
         self.ax.set_xlabel(xlabel, fontsize=16)
         self.ax.set_ylabel(ylabel, fontsize=16)
-        self.ax.set_xscale(xscale)
-        self.ax.set_yscale(yscale)
+        self.ax.set_xscale(xscale, **scalekwargs)
+        self.ax.set_yscale(yscale, **scalekwargs)
         self.ax.set_xlim(self.x_start, self.x_end)
         self.fig.tight_layout()
 # End of class 
 
-# Define constants and variables from problem 
-a = np.exp(x)       # Scaling factor instead of x may be more intuitive
-H0 = 67*pr_second_to_km_pr_second_pr_Mparsec
-TCMB0 = 2.7255
-Neff = 3.046
-OmegaR0 = 2 * np.pi**2 / 30 * (scc.k * TCMB0)**4 / (scc.hbar**3 * scc.c**5) * 8 * np.pi * scc.G / (3 * H0**2)
-OmegaNu0 = Neff * 7 / 8 * (4 / 11)**(4/3) * OmegaR0
-OmegaB0 = 0.05
-OmegaCDM0 = 0.267
-OmegaK0 = 0.0
-OmegaLambda0 = 1 - (OmegaK0 + OmegaB0 + OmegaCDM0 + OmegaR0 + OmegaNu0)
+# Function which finds index for given criteria. Made this when Newtons method failed me 
+def find_index(x, condition=False, x_start=None, x_end=None, eps=0.1, step=1e-5):
+    if x_start is None: x_start = x[0]
+    if x_end is None: x_end = x[-1]
+    domain = np.logical_and(x > x_start, x < x_end)
+    interval = condition[domain]
+    slice = np.where(interval < eps)[0]
+    N_satisfied_condition = len(slice)
+    while N_satisfied_condition > 1:
+        eps -= step 
+        slice = np.where(interval < eps)[0]
+        N_satisfied_condition = len(slice)
+    if N_satisfied_condition < 1:
+         raise Exception("Could not find value.")
 
-A = OmegaR0 + OmegaNu0
-B = OmegaB0 + OmegaCDM0
-C = OmegaK0
-D = OmegaLambda0
+    index = np.where(x[domain][slice] == x)[0]
+    return index[0]
 
-x_Matterdom_start = -9
-x_DEdom_start = -0.8
 
-x_Rad_index = np.where(x < x_Matterdom_start)
-x_Matter_index = np.logical_and(x > x_Matterdom_start, x < x_DEdom_start)
-x_DE_index = np.where(x > x_DEdom_start)
+# Approximated functions in different domination eras 
 
 def etaHp_R_pr_c(x):
-    # Radiation dominated
+    # Radiation dominated approx
     return np.ones(len(x))
 
 def etaHp_M_pr_c(x):
-    # Matter dominated
-    return np.exp(x_Matterdom_start - 0.5*x) + 2*(1 - np.exp(0.5*(x_Matterdom_start - x))) 
+    # Matter dominated approx
+    return np.exp(x_RelM_dom - 0.5*x) + 2*(1 - np.exp(0.5*(x_RelM_dom - x))) 
 
 def etaHp_L_pr_c(x):
-    # Dark energy dominated 
-    return np.exp(x + x_Matterdom_start) + np.exp(x - x_DEdom_start) + 2*(np.exp(x + 0.5*x_DEdom_start) - np.exp(x + 0.5*x_Matterdom_start)) - 1
+    # Dark energy dominated approx
+    return np.exp(x + x_RelM_dom) + np.exp(x - x_MLambda_dom) + 2*(np.exp(x + 0.5*x_MLambda_dom) - np.exp(x + 0.5*x_RelM_dom)) - 1
 
-# Call all plots 
+
+# Define plotting functions: 
+
 def plot_demonstrate_code():
     label_dHpdx = r'$\frac{1}{\mathcal{H}(x)}\frac{d\mathcal{H}(x)}{dx}\;$'
     label_ddHpddx = r'$\frac{1}{\mathcal{H}(x)}\frac{d^2\mathcal{H}(x)}{dx^2}\;$'
@@ -129,19 +128,24 @@ def plot_demonstrate_code():
     plot_Hp_derivatives.format_plot('x=ln(a)')
     plt.show()
 
+    # Define plotting domains for dominations 
+    domain_Rel_dom = np.where(x < x_RelM_dom) 
+    domain_M_dom = np.logical_and(x > x_RelM_dom, x < x_MLambda_dom) 
+    domain_DE_dom = np.where(x > x_MLambda_dom) 
+
     title = r'$\frac{\eta(x)\mathcal{H}(x)}{c}\;$'
     plot_etaHp_pr_c = make_plot(title=title)
     plot_etaHp_pr_c.plot(x, eta_of_x*Hp_of_x/c, color='k', label='Numerical', lw=2, ls='--')
-    plot_etaHp_pr_c.plot(x[x_Rad_index], etaHp_R_pr_c(x[x_Rad_index]), color='tab:red', label='Rad. dom. approx.')
-    plot_etaHp_pr_c.plot(x[x_Matter_index], etaHp_M_pr_c(x[x_Matter_index]), color='tab:orange', label='Matter dom. approx.')
-    plot_etaHp_pr_c.plot(x[x_DE_index], etaHp_L_pr_c(x[x_DE_index]), color='tab:green', label='DE dom. approx.')
+    plot_etaHp_pr_c.plot(x[domain_Rel_dom], etaHp_R_pr_c(x[domain_Rel_dom]), color='tab:red', label='Rad. dom. approx.')
+    plot_etaHp_pr_c.plot(x[domain_M_dom], etaHp_M_pr_c(x[domain_M_dom]), color='tab:orange', label='Matter dom. approx.')
+    plot_etaHp_pr_c.plot(x[domain_DE_dom], etaHp_L_pr_c(x[domain_DE_dom]), color='tab:green', label='DE dom. approx.')
 
     plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log')
     plt.show()
 
 
 def plot_conformal_Hubble():
-    title = r'$\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$'
+    title = r'Evolution of conformal Hubble factor $\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$'
     plot_Hp = make_plot(-12, 0, title=title)
     plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)
     plot_Hp.format_plot('x=ln(a)', yscale='log')
@@ -149,25 +153,29 @@ def plot_conformal_Hubble():
 
 
 def plot_conformal_time_pr_c():
-    title = r'$\frac{\eta(x)}{c}\;\left(\frac{Mpc}{c}\right)$'
-    plot_eta_pr_c = make_plot(-12, 0, title=title)
-    plot_eta_pr_c.plot(x, eta_of_x/(c*parsec))
+    title = r'Evolution of conformal time $\eta(x)\;\left(Mpc\right)$'
+    plot_eta_pr_c = make_plot(title=title)
+    plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec))
     plot_eta_pr_c.format_plot('x=ln(a)', yscale='log')
     plt.show()
 
 
 def plot_time():
-    plot_t = make_plot(-12, 0, title=r'$t(x)\;(Gyr)$')
+    plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds)
-    plot_t.format_plot('x=ln(a)', yscale='log')
+    plot_t.format_plot('Scalefactor a', yscale='log')
     plt.show()
 
 
 def plot_densities():
     plot_densities = make_plot(x[0], x[-1], title=r'$\Omega_i$')
-    plot_densities.plot(x, OmegaR + OmegaNu, label=r'$\Omega_{rel}=\Omega_R + \Omega_\nu$')
-    plot_densities.plot(x, OmegaB + OmegaCDM, label=r'$\Omega_{matter}=\Omega_B + \Omega_{CDM}$')
+    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{rel}=\Omega_R + \Omega_\nu$')
+    plot_densities.plot(x, OmegaM, label=r'$\Omega_{matter}=\Omega_B + \Omega_{CDM}$')
     plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$')
+
+    plot_densities.ax.vlines(x_RelM_eq, 0, 1, color='k', ls='--')
+    plot_densities.ax.vlines(x_MLambda_eq, 0, 1, color='k', ls='--')
+
     plot_densities.format_plot('x=ln(a)')
 
     plt.show()
@@ -175,7 +183,7 @@ def plot_densities():
 def plot_luminosity_distance_of_z():
     fig = plt.figure()
     ax = fig.add_subplot()
-    ax.set_title(r'Luminosity distance $d_L / z$', fontsize=16)
+    ax.set_title(r'Luminosity distance $d_L / z$ compared to supernovadata', fontsize=16)
     ax.errorbar(z, luminosity_distance_of_z / z, ls='', marker='o', ms=3, yerr=luminosity_error/z, ecolor='k', capsize=0, color="k", label=r'Supernovadata')
     ax.plot(z_of_x, luminosity_distance_of_x / (z_of_x*parsec*1e9), color='r', label='Theoretical')
     ax.set_xlim(1.1*z[0], 1.1*z[-1])
@@ -242,14 +250,47 @@ def plot_posterior_PDF_OmegaLambda():
 
     plt.show()
 
+# Scaling factor instead of x may be more intuitive
+a = np.exp(x)       
+
+# Define shorthand for these sums 
+OmegaRel = OmegaR + OmegaNu
+OmegaM = OmegaB + OmegaCDM
+
+# Find density parameters equalities 
+Rel_M_equality = abs(OmegaRel - OmegaM)
+M_Lambda_equality = abs(OmegaLambda - OmegaM)
+
+index_RelM_eq = find_index(x, Rel_M_equality, x_start=-10, x_end=-5)
+index_MLambda_eq = find_index(x, M_Lambda_equality, x_start=-1, x_end=1)
+x_RelM_eq = x[index_RelM_eq]
+x_MLambda_eq = x[index_MLambda_eq]
+
+# Find density parameters domination. Defined to be dominating if 0.75% is left. 
+percent_for_domination = 0.75
+Rel_dom = abs(OmegaRel - percent_for_domination)
+M_dom = abs(OmegaM - percent_for_domination)
+
+index_Rel_dom = find_index(x, Rel_dom, x_start=-10, x_end=-5)
+index_M_dom = find_index(x, M_dom, x_start=-1, x_end=1)
+
+x_RelM_dom = x[index_Rel_dom]
+x_MLambda_dom = x[index_M_dom]
+
+# Find age of universe today (x=0)
+age_index = find_index(t_of_x/Gyr_to_seconds, abs(x))
+# print((t_of_x/Gyr_to_seconds)[age_index])
+
+# Find when universe accelerated 
+
 # Control unit for plotting 
-plot_demonstrate_code()
+# plot_demonstrate_code()
 plot_conformal_Hubble()
-plot_conformal_time_pr_c()
+# plot_conformal_time_pr_c()
 plot_time()
-plot_densities()
-plot_luminosity_distance_of_z()
-plot_supernovadata_MCMC_fits()
-plot_posterior_PDF_Hubble_param()
-plot_posterior_PDF_OmegaLambda()
+# plot_densities()
+# plot_luminosity_distance_of_z()
+# plot_supernovadata_MCMC_fits()
+# plot_posterior_PDF_Hubble_param()
+# plot_posterior_PDF_OmegaLambda()
 
