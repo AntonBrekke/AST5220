@@ -286,7 +286,7 @@ age_index = find_index(t_of_x/Gyr_to_seconds, abs(x))
 # Control unit for plotting 
 # plot_demonstrate_code()
 plot_conformal_Hubble()
-# plot_conformal_time_pr_c()
+plot_conformal_time_pr_c()
 plot_time()
 # plot_densities()
 # plot_luminosity_distance_of_z()
