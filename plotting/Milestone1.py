@@ -333,5 +333,5 @@ x_MLambda_dom = x[index_M_dom]
 # plot_posterior_PDF_Hubble_param()
 # plot_posterior_PDF_OmegaLambda()
 
-# make_table(latex=False)
+make_table(latex=False)
 
