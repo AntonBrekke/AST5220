@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt 
-import seaborn as sns 
 import scipy.constants as scc
+import tabulate as tab
+import latextable as lt
+import texttable as txt
 
 # Changing standardcolor cycle to preferred cycle  
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -77,7 +79,8 @@ class make_plot:
         self.fig.tight_layout()
 # End of class 
 
-# Function which finds index for given criteria. Made this when Newtons method failed me 
+
+# Function which finds index of data for given criterion. Made this when Newtons method failed me 
 def find_index(x, condition=False, x_start=None, x_end=None, eps=0.1, step=1e-5):
     if x_start is None: x_start = x[0]
     if x_end is None: x_end = x[-1]
@@ -143,14 +146,12 @@ def plot_demonstrate_code():
     plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log')
     plt.show()
 
-
 def plot_conformal_Hubble():
     title = r'Evolution of conformal Hubble factor $\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$'
     plot_Hp = make_plot(-12, 0, title=title)
     plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)
     plot_Hp.format_plot('x=ln(a)', yscale='log')
     plt.show()
-
 
 def plot_conformal_time_pr_c():
     title = r'Evolution of conformal time $\eta(x)\;\left(Mpc\right)$'
@@ -159,19 +160,26 @@ def plot_conformal_time_pr_c():
     plot_eta_pr_c.format_plot('x=ln(a)', yscale='log')
     plt.show()
 
-
 def plot_time():
     plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds)
-    plot_t.format_plot('Scalefactor a', yscale='log')
+    plot_t.format_plot('x', yscale='log')
     plt.show()
-
 
 def plot_densities():
     plot_densities = make_plot(x[0], x[-1], title=r'$\Omega_i$')
     plot_densities.plot(x, OmegaRel, label=r'$\Omega_{rel}=\Omega_R + \Omega_\nu$')
     plot_densities.plot(x, OmegaM, label=r'$\Omega_{matter}=\Omega_B + \Omega_{CDM}$')
     plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$')
+
+    # Find density parameter equalities 
+    Rel_M_equality = abs(OmegaRel - OmegaM)
+    M_Lambda_equality = abs(OmegaLambda - OmegaM)
+
+    index_RelM_eq = find_index(x, Rel_M_equality, x_start=-10, x_end=-5)
+    index_MLambda_eq = find_index(x, M_Lambda_equality, x_start=-1, x_end=1)
+    x_RelM_eq = x[index_RelM_eq]
+    x_MLambda_eq = x[index_MLambda_eq]
 
     plot_densities.ax.vlines(x_RelM_eq, 0, 1, color='k', ls='--')
     plot_densities.ax.vlines(x_MLambda_eq, 0, 1, color='k', ls='--')
@@ -196,7 +204,6 @@ def plot_luminosity_distance_of_z():
     fig.tight_layout()
     plt.show()
 
-
 def plot_supernovadata_MCMC_fits():
     chi2_min = np.min(chi2)
 
@@ -217,7 +224,6 @@ def plot_supernovadata_MCMC_fits():
     plt.ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
     plt.legend(prop={'size':12})
     plt.show()
-
 
 def plot_posterior_PDF_Hubble_param():
     # H0 = h / Constants.H0_over_h, see BackgroundCosmology.cpp. PDF will be same.
@@ -250,21 +256,59 @@ def plot_posterior_PDF_OmegaLambda():
 
     plt.show()
 
+def make_table(latex=False):
+    # Find density parameters equalities 
+    Rel_M_equality = abs(OmegaRel - OmegaM)
+    M_Lambda_equality = abs(OmegaLambda - OmegaM)
+
+    index_RelM_eq = find_index(x, Rel_M_equality, x_start=-10, x_end=-5)
+    index_MLambda_eq = find_index(x, M_Lambda_equality, x_start=-1, x_end=1)
+    x_RelM_eq = x[index_RelM_eq]
+    z_RelM_eq = z_of_x[index_RelM_eq]
+    t_RelM_eq = (t_of_x/Gyr_to_seconds)[index_RelM_eq]
+
+    x_MLambda_eq = x[index_MLambda_eq]
+    z_MLambda_eq = z_of_x[index_MLambda_eq]
+    t_MLambda_eq = (t_of_x/Gyr_to_seconds)[index_MLambda_eq]
+
+    # Find age of universe today (x=0)
+    age_index = find_index(t_of_x/Gyr_to_seconds, abs(x))
+    x_age = x[age_index]
+    z_age = z_of_x[age_index]
+    t_age = (t_of_x/Gyr_to_seconds)[age_index]
+
+    # Universe accelearting
+    a_double_dot = np.exp(-x)*dHpdx_of_x*Hp_of_x
+    acc_index = np.min(np.where(a_double_dot >= 0))
+    x_acc  = x[acc_index]
+    z_acc = z_of_x[acc_index]
+    t_acc = (t_of_x/Gyr_to_seconds)[acc_index]
+
+    # Make tables
+    tab_print = [['', 'x', 'z', 't (Gyr)'],
+                 ['Rad. Mat. eq', x_RelM_eq, z_RelM_eq, t_RelM_eq],
+                 ['Mat.DE.eq', x_MLambda_eq, z_MLambda_eq, t_MLambda_eq],
+                 ['Uni. age', x_age, z_age, t_age],
+                 ['Uni. acc', x_acc, z_acc, t_acc]]
+
+    tab_data = tab.tabulate(tab_print,  tablefmt="simple_grid")
+    print(tab_data)
+    
+    if latex is True:
+        # Latex table
+        tab_data_latex = txt.Texttable()
+        tab_data_latex.set_cols_align(["l", "c", "c", "c"])
+        tab_data_latex.add_rows(tab_print)
+        print(lt.draw_latex(tab_data_latex))
+
+
+
 # Scaling factor instead of x may be more intuitive
 a = np.exp(x)       
 
 # Define shorthand for these sums 
 OmegaRel = OmegaR + OmegaNu
 OmegaM = OmegaB + OmegaCDM
-
-# Find density parameters equalities 
-Rel_M_equality = abs(OmegaRel - OmegaM)
-M_Lambda_equality = abs(OmegaLambda - OmegaM)
-
-index_RelM_eq = find_index(x, Rel_M_equality, x_start=-10, x_end=-5)
-index_MLambda_eq = find_index(x, M_Lambda_equality, x_start=-1, x_end=1)
-x_RelM_eq = x[index_RelM_eq]
-x_MLambda_eq = x[index_MLambda_eq]
 
 # Find density parameters domination. Defined to be dominating if 0.75% is left. 
 percent_for_domination = 0.75
@@ -274,23 +318,20 @@ M_dom = abs(OmegaM - percent_for_domination)
 index_Rel_dom = find_index(x, Rel_dom, x_start=-10, x_end=-5)
 index_M_dom = find_index(x, M_dom, x_start=-1, x_end=1)
 
+# These are needed for plotting
 x_RelM_dom = x[index_Rel_dom]
 x_MLambda_dom = x[index_M_dom]
 
-# Find age of universe today (x=0)
-age_index = find_index(t_of_x/Gyr_to_seconds, abs(x))
-# print((t_of_x/Gyr_to_seconds)[age_index])
-
-# Find when universe accelerated 
-
 # Control unit for plotting 
 # plot_demonstrate_code()
-plot_conformal_Hubble()
-plot_conformal_time_pr_c()
-plot_time()
+# plot_conformal_Hubble()
+# plot_conformal_time_pr_c()
+# plot_time()
 # plot_densities()
 # plot_luminosity_distance_of_z()
 # plot_supernovadata_MCMC_fits()
 # plot_posterior_PDF_Hubble_param()
 # plot_posterior_PDF_OmegaLambda()
+
+# make_table(latex=False)
 
