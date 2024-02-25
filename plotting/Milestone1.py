@@ -49,24 +49,26 @@ class make_plot:
         self.ax = self.fig.add_subplot() 
         self.ax.set_title(self.title, fontsize=16)
 
-    def plot(self, x, data, label='', **kwargs):
+    def plot(self, x, data, label='', loc='best', **kwargs):
         if (self.x_start) is None: self.x_start = x[0]
         if (self.x_end) is None: self.x_end = x[-1]
         self.x_axis_index = np.logical_and(x >= self.x_start, x <= self.x_end)
         self.ax.plot(x[self.x_axis_index], (data)[self.x_axis_index], label=label, **kwargs)
+        self.ax.tick_params(axis='both', which='major', labelsize=14)
         if label != '':
-            self.ax.legend(prop={'size': 12})
+            self.ax.legend(prop={'size': 14}, loc=loc)
         # Call show when ready 
 
-    def hist(self, data, bins, label='', density=False):
+    def hist(self, data, bins, label='', loc='best', density=False):
         self.counts, bins = np.histogram(data, bins=bins)
         self.n, self.bins, self.patches = self.ax.hist(bins[:-1], bins, weights=self.counts, density=density)
         cm = plt.get_cmap('Spectral_r')
         cmap = cm((self.n - np.min(self.n))/(np.max(self.n) - np.min(self.n)))
         for color, patch in zip(cmap, self.patches):
             plt.setp(patch, 'facecolor', color)
+        self.ax.tick_params(axis='both', which='major', labelsize=14)
         if label != '':
-            self.ax.legend(prop={'size': 12})
+            self.ax.legend(prop={'size': 14}, loc=loc)
         # Call show when ready
 
     def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', **scalekwargs):
@@ -172,7 +174,7 @@ def plot_conformal_time_pr_c():
 def plot_time():
     plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds)
-    plot_t.format_plot('x', yscale='log')
+    plot_t.format_plot('x=ln(a)', yscale='log')
 
     plot_t.fig.tight_layout()
     plt.savefig(savefig_path + r'/cosmic_time.pdf')
@@ -180,9 +182,9 @@ def plot_time():
 
 def plot_densities():
     plot_densities = make_plot(x[0], x[-1], title=r'$\Omega_i$')
-    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{rel}=\Omega_R + \Omega_\nu$')
-    plot_densities.plot(x, OmegaM, label=r'$\Omega_{matter}=\Omega_B + \Omega_{CDM}$')
-    plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$')
+    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{\text{rel}}$')
+    plot_densities.plot(x, OmegaM, label=r'$\Omega_{\text{matter}}$')
+    plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$', loc='center left')
 
     # Find density parameter equalities 
     Rel_M_equality = abs(OmegaRel - OmegaM)
@@ -214,7 +216,7 @@ def plot_luminosity_distance_of_z():
     ax.set_xlabel('Redshift z', fontsize=16)
     ax.set_ylabel(r'$d_L$/z (Mpc)', fontsize=16)
 
-    ax.legend(prop={'size': 12})
+    ax.legend(prop={'size': 16})
     fig.tight_layout()
     plt.savefig(savefig_path + r'/luminosity_distance.pdf')
     plt.show()
@@ -240,7 +242,7 @@ def plot_supernovadata_MCMC_fits():
 
     ax.set_xlabel(r'$\Omega_{M}$', fontsize=16)
     ax.set_ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
-    ax.legend(prop={'size':12})
+    ax.legend(prop={'size':16})
     fig.tight_layout()
     plt.savefig(savefig_path + r'/supernovadata_MCMC_fits.pdf')
     plt.show()
@@ -351,15 +353,15 @@ x_RelM_dom = x[index_Rel_dom]
 x_MLambda_dom = x[index_M_dom]
 
 # Control unit for plotting 
-plot_demonstrate_code()
-plot_conformal_Hubble()
-plot_conformal_time_pr_c()
-plot_time()
-plot_densities()
-plot_luminosity_distance_of_z()
-plot_supernovadata_MCMC_fits()
-plot_posterior_PDF_Hubble_param()
-plot_posterior_PDF_OmegaLambda()
+# plot_demonstrate_code()
+# plot_conformal_Hubble()
+# plot_conformal_time_pr_c()
+# plot_time()
+# plot_densities()
+# plot_luminosity_distance_of_z()
+# plot_supernovadata_MCMC_fits()
+# plot_posterior_PDF_Hubble_param()
+# plot_posterior_PDF_OmegaLambda()
 
 # make_table(latex=True)
 
