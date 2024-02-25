@@ -15,6 +15,8 @@ Unix_path = r'/home/antonabr/AST5220/data'
 Windows_path = r'C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data'
 path = Unix_path
 
+savefig_path = r'/home/antonabr/AST5220/figures/Milestone1'
+
 # Get data
 supernovadata = np.loadtxt(fr'{path}' + r'/supernovadata.txt')
 results_supernovafitting = np.loadtxt(fr'{path}' + r'/results_supernovafitting.txt', skiprows=200)
@@ -99,7 +101,6 @@ def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
     return index[0]
 
 
-
 # Approximated functions in different domination eras 
 
 def etaHp_R_pr_c(x):
@@ -130,6 +131,8 @@ def plot_demonstrate_code():
     plot_Hp_derivatives.plot(x, 1/4*np.ones(len(x)), color='k', ls=':')
 
     plot_Hp_derivatives.format_plot('x=ln(a)')
+    plot_Hp_derivatives.fig.tight_layout()
+    plt.savefig(savefig_path + r'/Hp_derivatives.pdf')
     plt.show()
 
     # Define plotting domains for dominations 
@@ -145,6 +148,8 @@ def plot_demonstrate_code():
     plot_etaHp_pr_c.plot(x[domain_DE_dom], etaHp_L_pr_c(x[domain_DE_dom]), color='tab:green', label='DE dom. approx.')
 
     plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log')
+    plot_etaHp_pr_c.fig.tight_layout()
+    plt.savefig(savefig_path + r'/etaHp_pr_c.pdf')
     plt.show()
 
 def plot_conformal_Hubble():
@@ -152,6 +157,9 @@ def plot_conformal_Hubble():
     plot_Hp = make_plot(-12, 0, title=title)
     plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)
     plot_Hp.format_plot('x=ln(a)', yscale='log')
+
+    plot_Hp.fig.tight_layout()
+    plt.savefig(savefig_path + r'/Hp.pdf')
     plt.show()
 
 def plot_conformal_time_pr_c():
@@ -159,12 +167,18 @@ def plot_conformal_time_pr_c():
     plot_eta_pr_c = make_plot(title=title)
     plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec*c))
     plot_eta_pr_c.format_plot('x=ln(a)', yscale='log')
+
+    plot_eta_pr_c.fig.tight_layout()
+    plt.savefig(savefig_path + r'/eta_pr_c.pdf')
     plt.show()
 
 def plot_time():
     plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds)
     plot_t.format_plot('x', yscale='log')
+
+    plot_t.fig.tight_layout()
+    plt.savefig(savefig_path + r'/cosmic_time.pdf')
     plt.show()
 
 def plot_densities():
@@ -187,6 +201,8 @@ def plot_densities():
 
     plot_densities.format_plot('x=ln(a)')
 
+    plot_densities.fig.tight_layout()
+    plt.savefig(savefig_path + r'/densities.pdf')
     plt.show()
 
 def plot_luminosity_distance_of_z():
@@ -203,9 +219,13 @@ def plot_luminosity_distance_of_z():
 
     ax.legend(prop={'size': 12})
     fig.tight_layout()
+    plt.savefig(savefig_path + r'/luminosity_distance.pdf')
     plt.show()
 
 def plot_supernovadata_MCMC_fits():
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
     chi2_min = np.min(chi2)
 
     chi2_1sigma = np.where((chi2 - chi2_min) < 3.53)    # 1 sigma
@@ -217,14 +237,17 @@ def plot_supernovadata_MCMC_fits():
     OmegaLambda_selected_2sigma = (1 - (OmegaM_sn + OmegaK_sn))[chi2_2sigma]
 
     line = -1*np.linspace(0, 1, len(OmegaLambda_selected_2sigma)) + 1
-    plt.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$')
-    plt.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$')
-    plt.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
+    ax.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$')
+    ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$')
+    ax.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
 
-    plt.xlabel(r'$\Omega_{M}$', fontsize=16)
-    plt.ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
-    plt.legend(prop={'size':12})
+    ax.set_xlabel(r'$\Omega_{M}$', fontsize=16)
+    ax.set_ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
+    ax.legend(prop={'size':12})
+    fig.tight_layout()
+    plt.savefig(savefig_path + r'/supernovadata_MCMC_fits.pdf')
     plt.show()
+
 
 def plot_posterior_PDF_Hubble_param():
     # H0 = h / Constants.H0_over_h, see BackgroundCosmology.cpp. PDF will be same.
@@ -239,6 +262,8 @@ def plot_posterior_PDF_Hubble_param():
     posterior_H0_pdf.plot(bins, gaussian, color='k', lw=2.5)
     posterior_H0_pdf.format_plot(xlabel=r'$H_0$')
 
+    posterior_H0_pdf.fig.tight_layout()
+    plt.savefig(savefig_path + r'/posterior_PDF_Hubble_param.pdf')
     plt.show()
 
 def plot_posterior_PDF_OmegaLambda():
@@ -248,13 +273,14 @@ def plot_posterior_PDF_OmegaLambda():
     bins = posterior_OmegaLambda_pdf.bins
     # print(np.sum(np.diff(posterior_OmegaLambda_pdf.bins) * posterior_OmegaLambda_pdf.n))   # Testing if prop. dist sum to 1 
 
-
     sigma = np.std(OmegaLambda_sn)
     mu = np.mean(OmegaLambda_sn)
     gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
     posterior_OmegaLambda_pdf.plot(bins, gaussian, color='k', lw=2.5)
     posterior_OmegaLambda_pdf.format_plot(xlabel=r'$\Omega_{\Lambda}$')
 
+    posterior_OmegaLambda_pdf.fig.tight_layout()
+    plt.savefig(savefig_path + r'/posterior_PDF_OmegaLambda.pdf')
     plt.show()
 
 def make_table(latex=False):
@@ -338,5 +364,5 @@ plot_supernovadata_MCMC_fits()
 plot_posterior_PDF_Hubble_param()
 plot_posterior_PDF_OmegaLambda()
 
-make_table(latex=True)
+# make_table(latex=True)
 
