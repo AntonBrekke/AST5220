@@ -24,7 +24,7 @@ cosmology = np.loadtxt(fr'{path}' + r'/cosmology.txt')
 x, eta_of_x, detadx_of_x, t_of_x, Hp_of_x, dHpdx_of_x, ddHpddx_of_x, OmegaB, OmegaCDM, \
 OmegaLambda, OmegaR, OmegaNu, OmegaK, luminosity_distance_of_x, z_of_x = cosmology.T
 
-chi2, h, OmegaM, OmegaK = results_supernovafitting.T
+chi2, h, OmegaM_sn, OmegaK_sn = results_supernovafitting.T
 
 # (z, Gpc, Gpc), z is redshift 
 z, luminosity_distance_of_z, luminosity_error = supernovadata.T
@@ -80,23 +80,24 @@ class make_plot:
 # End of class 
 
 
-# Function which finds index of data for given criterion. Made this when Newtons method failed me 
-def find_index(x, condition=False, x_start=None, x_end=None, eps=0.1, step=1e-5):
-    if x_start is None: x_start = x[0]
-    if x_end is None: x_end = x[-1]
-    domain = np.logical_and(x > x_start, x < x_end)
-    interval = condition[domain]
-    slice = np.where(interval < eps)[0]
-    N_satisfied_condition = len(slice)
+# Function which finds index of data for given abs(F - value) < 0. Made this when Newtons method failed me 
+def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
+    if start is None: start = np.min(data)
+    if end is None: end = np.max(data)
+    domain = (data > start) * (data < end)
+    condition = condition[domain]
+    index_satisfied_condition = np.where(condition < eps)[0]
+    N_satisfied_condition = len(index_satisfied_condition)
+
     while N_satisfied_condition > 1:
         eps -= step 
-        slice = np.where(interval < eps)[0]
-        N_satisfied_condition = len(slice)
-    if N_satisfied_condition < 1:
-         raise Exception("Could not find value.")
-
-    index = np.where(x[domain][slice] == x)[0]
+        index_satisfied_condition = np.where(condition < eps)[0]
+        N_satisfied_condition = len(index_satisfied_condition)
+    if N_satisfied_condition < 1: raise Exception("Could not find single value.")
+    
+    index = np.where(data[domain][index_satisfied_condition] == data)[0]
     return index[0]
+
 
 
 # Approximated functions in different domination eras 
@@ -154,9 +155,9 @@ def plot_conformal_Hubble():
     plt.show()
 
 def plot_conformal_time_pr_c():
-    title = r'Evolution of conformal time $\eta(x)\;\left(Mpc\right)$'
+    title = r'Evolution of conformal time $\frac{\eta(x)}{c}\;\left(\frac{Mpc}{c}\right)$'
     plot_eta_pr_c = make_plot(title=title)
-    plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec))
+    plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec*c))
     plot_eta_pr_c.format_plot('x=ln(a)', yscale='log')
     plt.show()
 
@@ -176,8 +177,8 @@ def plot_densities():
     Rel_M_equality = abs(OmegaRel - OmegaM)
     M_Lambda_equality = abs(OmegaLambda - OmegaM)
 
-    index_RelM_eq = find_index(x, Rel_M_equality, x_start=-10, x_end=-5)
-    index_MLambda_eq = find_index(x, M_Lambda_equality, x_start=-1, x_end=1)
+    index_RelM_eq = find_index(x, Rel_M_equality, start=-10, end=-5)
+    index_MLambda_eq = find_index(x, M_Lambda_equality, start=-1, end=1)
     x_RelM_eq = x[index_RelM_eq]
     x_MLambda_eq = x[index_MLambda_eq]
 
@@ -210,10 +211,10 @@ def plot_supernovadata_MCMC_fits():
     chi2_1sigma = np.where((chi2 - chi2_min) < 3.53)    # 1 sigma
     chi2_2sigma = np.where((chi2 - chi2_min) < 8.02)    # 2 sigma
 
-    OmegaM_selected_1sigma = OmegaM[chi2_1sigma]
-    OmegaM_selected_2sigma = OmegaM[chi2_2sigma]
-    OmegaLambda_selected_1sigma = (1 - (OmegaM + OmegaK))[chi2_1sigma]
-    OmegaLambda_selected_2sigma = (1 - (OmegaM + OmegaK))[chi2_2sigma]
+    OmegaM_selected_1sigma = OmegaM_sn[chi2_1sigma]
+    OmegaM_selected_2sigma = OmegaM_sn[chi2_2sigma]
+    OmegaLambda_selected_1sigma = (1 - (OmegaM_sn + OmegaK_sn))[chi2_1sigma]
+    OmegaLambda_selected_2sigma = (1 - (OmegaM_sn + OmegaK_sn))[chi2_2sigma]
 
     line = -1*np.linspace(0, 1, len(OmegaLambda_selected_2sigma)) + 1
     plt.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$')
@@ -241,15 +242,15 @@ def plot_posterior_PDF_Hubble_param():
     plt.show()
 
 def plot_posterior_PDF_OmegaLambda():
-    OmegaLambda = 1 - (OmegaM + OmegaK)
+    OmegaLambda_sn = 1 - (OmegaM_sn + OmegaK_sn)
     posterior_OmegaLambda_pdf = make_plot(title=r'Posterior PDF for $\Omega_{\Lambda}$')
-    posterior_OmegaLambda_pdf.hist(OmegaLambda, bins=75, density=True)
+    posterior_OmegaLambda_pdf.hist(OmegaLambda_sn, bins=75, density=True)
     bins = posterior_OmegaLambda_pdf.bins
     # print(np.sum(np.diff(posterior_OmegaLambda_pdf.bins) * posterior_OmegaLambda_pdf.n))   # Testing if prop. dist sum to 1 
 
 
-    sigma = np.std(OmegaLambda)
-    mu = np.mean(OmegaLambda)
+    sigma = np.std(OmegaLambda_sn)
+    mu = np.mean(OmegaLambda_sn)
     gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
     posterior_OmegaLambda_pdf.plot(bins, gaussian, color='k', lw=2.5)
     posterior_OmegaLambda_pdf.format_plot(xlabel=r'$\Omega_{\Lambda}$')
@@ -261,8 +262,8 @@ def make_table(latex=False):
     Rel_M_equality = abs(OmegaRel - OmegaM)
     M_Lambda_equality = abs(OmegaLambda - OmegaM)
 
-    index_RelM_eq = find_index(x, Rel_M_equality, x_start=-10, x_end=-5)
-    index_MLambda_eq = find_index(x, M_Lambda_equality, x_start=-1, x_end=1)
+    index_RelM_eq = find_index(x, Rel_M_equality, start=-10, end=-5)
+    index_MLambda_eq = find_index(x, M_Lambda_equality, start=-1, end=1)
     x_RelM_eq = x[index_RelM_eq]
     z_RelM_eq = z_of_x[index_RelM_eq]
     t_RelM_eq = (t_of_x/Gyr_to_seconds)[index_RelM_eq]
@@ -277,25 +278,29 @@ def make_table(latex=False):
     z_age = z_of_x[age_index]
     t_age = (t_of_x/Gyr_to_seconds)[age_index]
 
-    # Universe accelearting
+    # Universe accelerating (when a_double_dot is positive)
     a_double_dot = np.exp(-x)*dHpdx_of_x*Hp_of_x
     acc_index = np.min(np.where(a_double_dot >= 0))
+    # acc_index = find_index(x, abs(a_double_dot/np.min(a_double_dot)), step=1e-10)
     x_acc  = x[acc_index]
     z_acc = z_of_x[acc_index]
     t_acc = (t_of_x/Gyr_to_seconds)[acc_index]
 
     # Make tables
     tab_print = [['', 'x', 'z', 't (Gyr)'],
-                 ['Rad. Mat. eq', x_RelM_eq, z_RelM_eq, t_RelM_eq],
-                 ['Mat.DE.eq', x_MLambda_eq, z_MLambda_eq, t_MLambda_eq],
-                 ['Uni. age', x_age, z_age, t_age],
-                 ['Uni. acc', x_acc, z_acc, t_acc]]
+                 ['Rad. Mat. eq', f'{x_RelM_eq:.3f}', f'{z_RelM_eq:.3f}', f'{t_RelM_eq:.3e}'],
+                 ['Mat. DE. eq', f'{x_MLambda_eq:.3f}', f'{z_MLambda_eq:.3f}', f'{t_MLambda_eq:.3f}'],
+                 ['Uni. today', f'{x_age:.3f}', f'{z_age:.3f}', f'{t_age:.3f}'],
+                 ['Uni. acc', f'{x_acc:.3f}', f'{z_acc:.3f}', f'{t_acc:.3f}']]
 
-    tab_data = tab.tabulate(tab_print,  tablefmt="simple_grid")
+    tab_data = tab.tabulate(tab_print, tablefmt="simple_grid")
     print(tab_data)
+    print(f'Conformal time today: {(eta_of_x/(c*Gyr_to_seconds))[age_index]:.3f} (Gyr)\n')
     
     if latex is True:
         # Latex table
+        print('Beautiful LateX-table, just for you! (double check small values)')
+        print('================================================================\n')
         tab_data_latex = txt.Texttable()
         tab_data_latex.set_cols_align(["l", "c", "c", "c"])
         tab_data_latex.add_rows(tab_print)
@@ -306,7 +311,7 @@ def make_table(latex=False):
 # Scaling factor instead of x may be more intuitive
 a = np.exp(x)       
 
-# Define shorthand for these sums 
+# # Define shorthand for these sums 
 OmegaRel = OmegaR + OmegaNu
 OmegaM = OmegaB + OmegaCDM
 
@@ -315,23 +320,23 @@ percent_for_domination = 0.75
 Rel_dom = abs(OmegaRel - percent_for_domination)
 M_dom = abs(OmegaM - percent_for_domination)
 
-index_Rel_dom = find_index(x, Rel_dom, x_start=-10, x_end=-5)
-index_M_dom = find_index(x, M_dom, x_start=-1, x_end=1)
+index_Rel_dom = find_index(x, Rel_dom, start=-10, end=-5)
+index_M_dom = find_index(x, M_dom, start=-1, end=1)
 
 # These are needed for plotting
 x_RelM_dom = x[index_Rel_dom]
 x_MLambda_dom = x[index_M_dom]
 
 # Control unit for plotting 
-# plot_demonstrate_code()
-# plot_conformal_Hubble()
-# plot_conformal_time_pr_c()
-# plot_time()
-# plot_densities()
-# plot_luminosity_distance_of_z()
-# plot_supernovadata_MCMC_fits()
-# plot_posterior_PDF_Hubble_param()
-# plot_posterior_PDF_OmegaLambda()
+plot_demonstrate_code()
+plot_conformal_Hubble()
+plot_conformal_time_pr_c()
+plot_time()
+plot_densities()
+plot_luminosity_distance_of_z()
+plot_supernovadata_MCMC_fits()
+plot_posterior_PDF_Hubble_param()
+plot_posterior_PDF_OmegaLambda()
 
-make_table(latex=False)
+make_table(latex=True)
 
