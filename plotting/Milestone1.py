@@ -10,11 +10,8 @@ colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
 plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
 
-# If I want to plot in Unix or Windows
-Unix_path = r'/home/antonabr/AST5220/data'
-Windows_path = r'C:\Users\anton\OneDrive\Skrivebord\Python\AST5220\data'
-path = Unix_path
-
+# Relevant paths to get data
+path = r'/home/antonabr/AST5220/data'
 savefig_path = r'/home/antonabr/AST5220/figures/Milestone1'
 
 # Get data
