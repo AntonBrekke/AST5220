@@ -1,11 +1,12 @@
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt 
 import scipy.constants as scc
 import tabulate as tab
 import latextable as lt
 import texttable as txt
 
-# Changing standardcolor cycle to preferred cycle  
+# Changing standard color cycle to preferred cycle  
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
 plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
@@ -56,7 +57,7 @@ class make_plot:
         self.ax.plot(x[self.x_axis_index], (data)[self.x_axis_index], label=label, **kwargs)
         self.ax.tick_params(axis='both', which='major', labelsize=14)
         if label != '':
-            self.ax.legend(prop={'size': 14}, loc=loc)
+            self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready 
 
     def hist(self, data, bins, label='', loc='best', density=False):
@@ -67,8 +68,14 @@ class make_plot:
         for color, patch in zip(cmap, self.patches):
             plt.setp(patch, 'facecolor', color)
         self.ax.tick_params(axis='both', which='major', labelsize=14)
+        # # Normalizer 
+        # norm = mpl.colors.Normalize(vmin=np.min(self.n), vmax=np.max(self.n)) 
+        # # creating ScalarMappable 
+        # sm = plt.cm.ScalarMappable(cmap=cm, norm=norm) 
+        # sm.set_array([]) 
+        # # plt.colorbar(sm, ax=self.ax, ticks=np.linspace(np.min(self.n), np.max(self.n), 5), format=lambda x, pos: f'{x:.1f}') 
         if label != '':
-            self.ax.legend(prop={'size': 14}, loc=loc)
+            self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready
 
     def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', **scalekwargs):
@@ -118,26 +125,31 @@ def etaHp_L_pr_c(x):
 # Define plotting functions: 
 
 def plot_demonstrate_code():
+    # Define plotting domains for dominations 
+    domain_Rel_dom = np.where(x < x_RelM_dom) 
+    domain_M_dom = np.logical_and(x > x_RelM_dom, x < x_MLambda_dom) 
+    domain_DE_dom = np.where(x > x_MLambda_dom) 
+
     label_dHpdx = r'$\frac{1}{\mathcal{H}(x)}\frac{d\mathcal{H}(x)}{dx}\;$'
     label_ddHpddx = r'$\frac{1}{\mathcal{H}(x)}\frac{d^2\mathcal{H}(x)}{dx^2}\;$'
     title = r'Evolution of derivatives of $\mathcal{H}(x)\equiv aH(x)$'
     plot_Hp_derivatives = make_plot(title=title)
+    # Hp'
     plot_Hp_derivatives.plot(x, dHpdx_of_x/Hp_of_x, label=label_dHpdx)
+    plot_Hp_derivatives.plot(x[domain_Rel_dom], -np.ones(len(x[domain_Rel_dom])), color='tab:red')
+    plot_Hp_derivatives.plot(x[domain_M_dom], -1/2*np.ones(len(x[domain_M_dom])), color='tab:orange')
+    plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid')
+    # Hp''
     plot_Hp_derivatives.plot(x, ddHpddx_of_x/Hp_of_x, label=label_ddHpddx)
-    plot_Hp_derivatives.plot(x, np.ones(len(x)), color='k', ls=':')
-    plot_Hp_derivatives.plot(x, -np.ones(len(x)), color='k', ls=':')
-    plot_Hp_derivatives.plot(x, -1/2*np.ones(len(x)), color='k', ls=':')
-    plot_Hp_derivatives.plot(x, 1/4*np.ones(len(x)), color='k', ls=':')
+    plot_Hp_derivatives.plot(x[domain_Rel_dom], np.ones(len(x[domain_Rel_dom])), color='tab:red', label='Rad. dom. approx.')
+    plot_Hp_derivatives.plot(x[domain_M_dom], 1/4*np.ones(len(x[domain_M_dom])), color='tab:orange', label='Matter dom. approx.')
+    plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid', label='DE dom. approx.')
+    plot_Hp_derivatives.ax.axvline(0, color='k', ls='--')
 
     plot_Hp_derivatives.format_plot('x=ln(a)')
     plot_Hp_derivatives.fig.tight_layout()
     plt.savefig(savefig_path + r'/Hp_derivatives.pdf')
     plt.show()
-
-    # Define plotting domains for dominations 
-    domain_Rel_dom = np.where(x < x_RelM_dom) 
-    domain_M_dom = np.logical_and(x > x_RelM_dom, x < x_MLambda_dom) 
-    domain_DE_dom = np.where(x > x_MLambda_dom) 
 
     title = r'$\frac{\eta(x)\mathcal{H}(x)}{c}\;$'
     plot_etaHp_pr_c = make_plot(title=title)
@@ -145,6 +157,7 @@ def plot_demonstrate_code():
     plot_etaHp_pr_c.plot(x[domain_Rel_dom], etaHp_R_pr_c(x[domain_Rel_dom]), color='tab:red', label='Rad. dom. approx.')
     plot_etaHp_pr_c.plot(x[domain_M_dom], etaHp_M_pr_c(x[domain_M_dom]), color='tab:orange', label='Matter dom. approx.')
     plot_etaHp_pr_c.plot(x[domain_DE_dom], etaHp_L_pr_c(x[domain_DE_dom]), color='tab:green', label='DE dom. approx.')
+    plot_etaHp_pr_c.ax.axvline(0, color='k', ls='--')
 
     plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log')
     plot_etaHp_pr_c.fig.tight_layout()
@@ -153,9 +166,10 @@ def plot_demonstrate_code():
 
 def plot_conformal_Hubble():
     title = r'Evolution of conformal Hubble factor $\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$'
-    plot_Hp = make_plot(-12, 0, title=title)
+    plot_Hp = make_plot(-12, 1, title=title)
     plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)
     plot_Hp.format_plot('x=ln(a)', yscale='log')
+    plot_Hp.ax.axvline(0, color='k', ls='--')
 
     plot_Hp.fig.tight_layout()
     plt.savefig(savefig_path + r'/Hp.pdf')
@@ -166,6 +180,7 @@ def plot_conformal_time_pr_c():
     plot_eta_pr_c = make_plot(title=title)
     plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec*c))
     plot_eta_pr_c.format_plot('x=ln(a)', yscale='log')
+    plot_eta_pr_c.ax.axvline(0, color='k', ls='--')
 
     plot_eta_pr_c.fig.tight_layout()
     plt.savefig(savefig_path + r'/eta_pr_c.pdf')
@@ -175,6 +190,7 @@ def plot_time():
     plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds)
     plot_t.format_plot('x=ln(a)', yscale='log')
+    plot_t.ax.axvline(0, color='k', ls='--')
 
     plot_t.fig.tight_layout()
     plt.savefig(savefig_path + r'/cosmic_time.pdf')
@@ -182,8 +198,8 @@ def plot_time():
 
 def plot_densities():
     plot_densities = make_plot(x[0], x[-1], title=r'$\Omega_i$')
-    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{\text{rel}}$')
-    plot_densities.plot(x, OmegaM, label=r'$\Omega_{\text{matter}}$')
+    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{\text{R}}$')
+    plot_densities.plot(x, OmegaM, label=r'$\Omega_{\text{M}}$')
     plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$', loc='center left')
 
     # Find density parameter equalities 
@@ -195,8 +211,9 @@ def plot_densities():
     x_RelM_eq = x[index_RelM_eq]
     x_MLambda_eq = x[index_MLambda_eq]
 
-    plot_densities.ax.vlines(x_RelM_eq, 0, 1, color='k', ls='--')
-    plot_densities.ax.vlines(x_MLambda_eq, 0, 1, color='k', ls='--')
+    plot_densities.ax.axvline(x_RelM_eq, color='k', ls=':')
+    plot_densities.ax.axvline(x_MLambda_eq, color='k', ls=':')
+    plot_densities.ax.axvline(0, color='k', ls='--')
 
     plot_densities.format_plot('x=ln(a)')
 
@@ -207,16 +224,19 @@ def plot_densities():
 def plot_luminosity_distance_of_z():
     fig = plt.figure()
     ax = fig.add_subplot()
-    ax.set_title(r'Luminosity distance $d_L / z$ compared to supernovadata', fontsize=16)
+
+    ax.set_title(r'Luminosity distance $d_L / z$', fontsize=16)
     ax.errorbar(z, luminosity_distance_of_z / z, ls='', marker='o', ms=3, yerr=luminosity_error/z, ecolor='k', capsize=0, color="k", label=r'Supernovadata')
     ax.plot(z_of_x, luminosity_distance_of_x / (z_of_x*parsec*1e9), color='r', label='Theoretical')
+
     ax.set_xlim(1.1*z[0], 1.1*z[-1])
     ax.set_ylim(4, 8)
     ax.set_xscale('log')
     ax.set_xlabel('Redshift z', fontsize=16)
-    ax.set_ylabel(r'$d_L$/z (Mpc)', fontsize=16)
+    ax.set_ylabel(r'$d_L$/z (Gpc)', fontsize=16)
+    ax.tick_params(axis='both', which='major', labelsize=14)
 
-    ax.legend(prop={'size': 16})
+    ax.legend(prop={'size': 14}, frameon=False)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/luminosity_distance.pdf')
     plt.show()
@@ -236,13 +256,16 @@ def plot_supernovadata_MCMC_fits():
     OmegaLambda_selected_2sigma = (1 - (OmegaM_sn + OmegaK_sn))[chi2_2sigma]
 
     line = -1*np.linspace(0, 1, len(OmegaLambda_selected_2sigma)) + 1
-    ax.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$')
-    ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$')
+    ax.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$', rasterized=True)
+    ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$', rasterized=True)
     ax.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
 
     ax.set_xlabel(r'$\Omega_{M}$', fontsize=16)
     ax.set_ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
-    ax.legend(prop={'size':16})
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.set_title('Supernovadata MCMC fits', fontsize=16)
+
+    ax.legend(prop={'size':14}, frameon=False)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/supernovadata_MCMC_fits.pdf')
     plt.show()
@@ -250,17 +273,21 @@ def plot_supernovadata_MCMC_fits():
 
 def plot_posterior_PDF_Hubble_param():
     # H0 = h / Constants.H0_over_h, see BackgroundCosmology.cpp. PDF will be same.
+    H0 = h * H0_over_h
     posterior_H0_pdf = make_plot(title=r'Posterior PDF for $H_0$')
-    posterior_H0_pdf.hist(h, bins=75, density=True)
+    posterior_H0_pdf.hist(H0, bins=75, density=True)
     bins = posterior_H0_pdf.bins
+    n = posterior_H0_pdf.n
     # print(np.sum(np.diff(posterior_H0_pdf.bins) * posterior_H0_pdf.n))   # Testing if prop. dist sum to 1 
 
-    sigma = np.std(h)
-    mu = np.mean(h)
+    sigma = np.std(H0)
+    mu = np.mean(H0)
     gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
     posterior_H0_pdf.plot(bins, gaussian, color='k', lw=2.5)
-    posterior_H0_pdf.format_plot(xlabel=r'$H_0$')
+    posterior_H0_pdf.ax.axvline(H0_best_fit, color='k', ls='--', lw=2.5, label='Best fit value of H0')
+    posterior_H0_pdf.ax.legend(prop={'size':14}, frameon=False)
 
+    posterior_H0_pdf.format_plot(xlabel=r'$H_0$')
     posterior_H0_pdf.fig.tight_layout()
     plt.savefig(savefig_path + r'/posterior_PDF_Hubble_param.pdf')
     plt.show()
@@ -334,7 +361,10 @@ def make_table(latex=False):
 
 
 # Scaling factor instead of x may be more intuitive
-a = np.exp(x)       
+a = np.exp(x)    
+h_best_fit = 0.70189
+H0_over_h = 100
+H0_best_fit = H0_over_h * h_best_fit
 
 # # Define shorthand for these sums 
 OmegaRel = OmegaR + OmegaNu
@@ -353,15 +383,15 @@ x_RelM_dom = x[index_Rel_dom]
 x_MLambda_dom = x[index_M_dom]
 
 # Control unit for plotting 
-# plot_demonstrate_code()
-# plot_conformal_Hubble()
-# plot_conformal_time_pr_c()
-# plot_time()
-# plot_densities()
-# plot_luminosity_distance_of_z()
-# plot_supernovadata_MCMC_fits()
-# plot_posterior_PDF_Hubble_param()
-# plot_posterior_PDF_OmegaLambda()
+plot_demonstrate_code()
+plot_conformal_Hubble()
+plot_conformal_time_pr_c()
+plot_time()
+plot_densities()
+plot_luminosity_distance_of_z()
+plot_supernovadata_MCMC_fits()
+plot_posterior_PDF_Hubble_param()
+plot_posterior_PDF_OmegaLambda()
 
 # make_table(latex=True)
 

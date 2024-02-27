@@ -55,7 +55,6 @@ int main(int argc, char **argv){
 
     // Output best fit values
     // Minimum chi^2 found chi^2 = 29.2811 h = 0.70189 OmegaM = 0.25932 (OmegaB + OmegaCDM) OmegaK = 0.0673887
-    // Minimum chi^2 found 29.2811 0.70189 0.25932 0.0673887
     BackgroundCosmology bestFit(0.702, OmegaB, 0.259 - OmegaB, 0.067, Neff, TCMB);
     Utils::StartTiming("Solve best params");
     bestFit.solve();
