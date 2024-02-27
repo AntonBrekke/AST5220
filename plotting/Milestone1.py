@@ -284,7 +284,7 @@ def plot_posterior_PDF_Hubble_param():
     mu = np.mean(H0)
     gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
     posterior_H0_pdf.plot(bins, gaussian, color='k', lw=2.5)
-    posterior_H0_pdf.ax.axvline(H0_best_fit, color='k', ls='--', lw=2.5, label='Best fit value of H0')
+    posterior_H0_pdf.ax.axvline(H0_best_fit, color='k', ls='--', lw=2.5, label=r'Best fit value of $H_0$')
     posterior_H0_pdf.ax.legend(prop={'size':14}, frameon=False)
 
     posterior_H0_pdf.format_plot(xlabel=r'$H_0$')
