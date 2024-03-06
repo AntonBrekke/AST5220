@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 import scipy.constants as scc
 import tabulate as tab
 import latextable as lt
-import texttable as txt
+import texttable as txttab
+import pynverse as pyinv
 
 # Changing standard color cycle to preferred cycle  
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -78,18 +79,27 @@ class make_plot:
             self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready
 
-    def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', **scalekwargs):
+    def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', grid=False, **scalekwargs):
         self.ax.set_xlabel(xlabel, fontsize=16)
         self.ax.set_ylabel(ylabel, fontsize=16)
         self.ax.set_xscale(xscale, **scalekwargs)
         self.ax.set_yscale(yscale, **scalekwargs)
         self.ax.set_xlim(self.x_start, self.x_end)
+        self.ax.grid(grid)
         self.fig.tight_layout()
 # End of class 
 
 
-# Function which finds index of data for given abs(F - value) < 0. Made this when Newtons method failed me 
+# Function which finds index of data
 def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
+    """
+    data: array you want index for. 
+    condition: abs(F - value). 
+    start, end: limit domain of search.
+    eps: treshold for acceptance. 
+    step: make treshold smaller each iteration.
+    return -> index for data when F = value  
+    """
     if start is None: start = np.min(data)
     if end is None: end = np.max(data)
     domain = (data > start) * (data < end)
@@ -105,9 +115,10 @@ def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
     
     index = np.where(data[domain][index_satisfied_condition] == data)[0]
     return index[0]
+# End of index-function
 
 
-# Approximated functions in different domination eras 
+# Approximated functions in different domination eras:
 
 def etaHp_R_pr_c(x):
     # Radiation dominated approx
@@ -115,51 +126,62 @@ def etaHp_R_pr_c(x):
 
 def etaHp_M_pr_c(x):
     # Matter dominated approx
-    return np.exp(x_RelM_dom - 0.5*x) + 2*(1 - np.exp(0.5*(x_RelM_dom - x))) 
+    return np.exp(x_M_dom - 0.5*x) + 2*(1 - np.exp(0.5*(x_M_dom - x))) 
 
-def etaHp_L_pr_c(x):
+def etaHp_DE_pr_c(x):
     # Dark energy dominated approx
-    return np.exp(x + x_RelM_dom) + np.exp(x - x_MLambda_dom) + 2*(np.exp(x + 0.5*x_MLambda_dom) - np.exp(x + 0.5*x_RelM_dom)) - 1
+    return np.exp(x + x_M_dom) + np.exp(x - x_Lambda_dom) + 2*(np.exp(x + 0.5*x_Lambda_dom) - np.exp(x + 0.5*x_M_dom)) - 1
 
 
 # Define plotting functions: 
 
 def plot_demonstrate_code():
     # Define plotting domains for dominations 
-    domain_Rel_dom = np.where(x < x_RelM_dom) 
-    domain_M_dom = np.logical_and(x > x_RelM_dom, x < x_MLambda_dom) 
-    domain_DE_dom = np.where(x > x_MLambda_dom) 
+    domain_Rel_dom = np.where(x < x_M_dom) 
+    domain_M_dom = np.logical_and(x > x_M_dom, x < x_Lambda_dom) 
+    domain_DE_dom = np.where(x > x_Lambda_dom) 
 
     label_dHpdx = r'$\frac{1}{\mathcal{H}(x)}\frac{d\mathcal{H}(x)}{dx}\;$'
     label_ddHpddx = r'$\frac{1}{\mathcal{H}(x)}\frac{d^2\mathcal{H}(x)}{dx^2}\;$'
     title = r'Evolution of derivatives of $\mathcal{H}(x)\equiv aH(x)$'
     plot_Hp_derivatives = make_plot(title=title)
     # Hp'
-    plot_Hp_derivatives.plot(x, dHpdx_of_x/Hp_of_x, label=label_dHpdx)
-    plot_Hp_derivatives.plot(x[domain_Rel_dom], -np.ones(len(x[domain_Rel_dom])), color='tab:red')
-    plot_Hp_derivatives.plot(x[domain_M_dom], -1/2*np.ones(len(x[domain_M_dom])), color='tab:orange')
-    plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid')
+    plot_Hp_derivatives.plot(x, dHpdx_of_x/Hp_of_x, label=label_dHpdx, lw=2)
+    plot_Hp_derivatives.plot(x[domain_Rel_dom], -np.ones(len(x[domain_Rel_dom])), color='tab:red', lw=2)
+    plot_Hp_derivatives.plot(x[domain_M_dom], -1/2*np.ones(len(x[domain_M_dom])), color='tab:orange', lw=2)
+    plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid', lw=2)
     # Hp''
-    plot_Hp_derivatives.plot(x, ddHpddx_of_x/Hp_of_x, label=label_ddHpddx)
-    plot_Hp_derivatives.plot(x[domain_Rel_dom], np.ones(len(x[domain_Rel_dom])), color='tab:red', label='Rad. dom. approx.')
-    plot_Hp_derivatives.plot(x[domain_M_dom], 1/4*np.ones(len(x[domain_M_dom])), color='tab:orange', label='Matter dom. approx.')
-    plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid', label='DE dom. approx.')
+    plot_Hp_derivatives.plot(x, ddHpddx_of_x/Hp_of_x, label=label_ddHpddx, lw=2)
+    plot_Hp_derivatives.plot(x[domain_Rel_dom], np.ones(len(x[domain_Rel_dom])), color='tab:red', label='Rad. dom. approx.', lw=2)
+    plot_Hp_derivatives.plot(x[domain_M_dom], 1/4*np.ones(len(x[domain_M_dom])), color='tab:orange', label='Matter dom. approx.', lw=2)
+    plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid', label='DE dom. approx.', lw=2)
     plot_Hp_derivatives.ax.axvline(0, color='k', ls='--')
 
-    plot_Hp_derivatives.format_plot('x=ln(a)')
+    plot_Hp_derivatives.format_plot('x=ln(a)', grid=True)
     plot_Hp_derivatives.fig.tight_layout()
     plt.savefig(savefig_path + r'/Hp_derivatives.pdf')
     plt.show()
 
+    # Skip some points for plotting 
+    N_points_skip = int(0.045*len(x))
+    x_Rel_relevant = x[domain_Rel_dom][::N_points_skip]
+    x_M_relevant = x[domain_M_dom][::N_points_skip]
+    x_DE_relevant = x[domain_DE_dom][::N_points_skip]
+
+    # Want nice spacing between points. Since matter dominated curve a lot, linear spacing makes it ugly. Distribute points according to function 
+    y_M_relevant = np.linspace(etaHp_M_pr_c(x_M_relevant[0]), etaHp_M_pr_c(x_M_relevant[-1]), len(x_M_relevant))
+    x_M_relevant = pyinv.inversefunc(etaHp_M_pr_c, y_values=y_M_relevant)
+
     title = r'$\frac{\eta(x)\mathcal{H}(x)}{c}\;$'
     plot_etaHp_pr_c = make_plot(title=title)
-    plot_etaHp_pr_c.plot(x, eta_of_x*Hp_of_x/c, color='k', label='Numerical', lw=2, ls='--')
-    plot_etaHp_pr_c.plot(x[domain_Rel_dom], etaHp_R_pr_c(x[domain_Rel_dom]), color='tab:red', label='Rad. dom. approx.')
-    plot_etaHp_pr_c.plot(x[domain_M_dom], etaHp_M_pr_c(x[domain_M_dom]), color='tab:orange', label='Matter dom. approx.')
-    plot_etaHp_pr_c.plot(x[domain_DE_dom], etaHp_L_pr_c(x[domain_DE_dom]), color='tab:green', label='DE dom. approx.')
-    plot_etaHp_pr_c.ax.axvline(0, color='k', ls='--')
+    plot_etaHp_pr_c.plot(x, eta_of_x*Hp_of_x/c, color='k', label='Numerical', lw=2)
+    plot_etaHp_pr_c.plot(x_Rel_relevant, etaHp_R_pr_c(x_Rel_relevant), color='tab:red', label='Rad. dom. approx.', ls='--', lw=2, marker='X')
+    plot_etaHp_pr_c.plot(x_M_relevant, etaHp_M_pr_c(x_M_relevant), color='tab:orange', label='Matter dom. approx.', ls='--', lw=2, marker='d')
+    plot_etaHp_pr_c.plot(x_DE_relevant, etaHp_DE_pr_c(x_DE_relevant), color='tab:green', label='DE dom. approx.', ls='--', lw=2, marker='P')
+    plot_etaHp_pr_c.ax.axvline(x_acc, color='k', ls='--')
+    plot_etaHp_pr_c.ax.axhline((eta_of_x*Hp_of_x/c)[acc_index], color='k', ls='--')
 
-    plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log')
+    plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log', grid=True)
     plot_etaHp_pr_c.fig.tight_layout()
     plt.savefig(savefig_path + r'/etaHp_pr_c.pdf')
     plt.show()
@@ -167,20 +189,22 @@ def plot_demonstrate_code():
 def plot_conformal_Hubble():
     title = r'Evolution of conformal Hubble factor $\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$'
     plot_Hp = make_plot(-12, 1, title=title)
-    plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)
-    plot_Hp.format_plot('x=ln(a)', yscale='log')
-    plot_Hp.ax.axvline(0, color='k', ls='--')
+    plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec, lw=2)
+    plot_Hp.format_plot('x=ln(a)', yscale='log', grid=True)
+    plot_Hp.ax.axvline(x_acc, color='k', ls='--')
+    plot_Hp.ax.axhline((Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec)[acc_index], color='k', ls='--')
 
     plot_Hp.fig.tight_layout()
     plt.savefig(savefig_path + r'/Hp.pdf')
     plt.show()
 
-def plot_conformal_time_pr_c():
+def plot_conformal_time():
     title = r'Evolution of conformal time $\frac{\eta(x)}{c}\;\left(\frac{Mpc}{c}\right)$'
     plot_eta_pr_c = make_plot(title=title)
-    plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec*c))
-    plot_eta_pr_c.format_plot('x=ln(a)', yscale='log')
+    plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec*c), lw=2)
+    plot_eta_pr_c.format_plot('x=ln(a)', yscale='log', grid=True)
     plot_eta_pr_c.ax.axvline(0, color='k', ls='--')
+    plot_eta_pr_c.ax.axhline((eta_of_x/(1e6*parsec*c))[today_index], color='k', ls='--')
 
     plot_eta_pr_c.fig.tight_layout()
     plt.savefig(savefig_path + r'/eta_pr_c.pdf')
@@ -188,19 +212,20 @@ def plot_conformal_time_pr_c():
 
 def plot_time():
     plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
-    plot_t.plot(x, t_of_x / Gyr_to_seconds)
-    plot_t.format_plot('x=ln(a)', yscale='log')
+    plot_t.plot(x, t_of_x / Gyr_to_seconds, lw=2)
+    plot_t.format_plot('x=ln(a)', yscale='log', grid=True)
     plot_t.ax.axvline(0, color='k', ls='--')
+    plot_t.ax.axhline((t_of_x / Gyr_to_seconds)[today_index], color='k', ls='--')
 
     plot_t.fig.tight_layout()
     plt.savefig(savefig_path + r'/cosmic_time.pdf')
     plt.show()
 
 def plot_densities():
-    plot_densities = make_plot(x[0], x[-1], title=r'$\Omega_i$')
-    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{\text{R}}$')
-    plot_densities.plot(x, OmegaM, label=r'$\Omega_{\text{M}}$')
-    plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$', loc='center left')
+    plot_densities = make_plot(title=r'$\Omega_i$')
+    plot_densities.plot(x, OmegaRel, label=r'$\Omega_{\text{R}}$', lw=2)
+    plot_densities.plot(x, OmegaM, label=r'$\Omega_{\text{M}}$', lw=2)
+    plot_densities.plot(x, OmegaLambda, label=r'$\Omega_\Lambda$', lw=2, loc='center left')
 
     # Find density parameter equalities 
     Rel_M_equality = abs(OmegaRel - OmegaM)
@@ -211,11 +236,10 @@ def plot_densities():
     x_RelM_eq = x[index_RelM_eq]
     x_MLambda_eq = x[index_MLambda_eq]
 
-    plot_densities.ax.axvline(x_RelM_eq, color='k', ls=':')
-    plot_densities.ax.axvline(x_MLambda_eq, color='k', ls=':')
-    plot_densities.ax.axvline(0, color='k', ls='--')
+    plot_densities.ax.axvline(x_RelM_eq, color='k', ls='--')
+    plot_densities.ax.axvline(x_MLambda_eq, color='k', ls='--')
 
-    plot_densities.format_plot('x=ln(a)')
+    plot_densities.format_plot('x=ln(a)', grid=True)
 
     plot_densities.fig.tight_layout()
     plt.savefig(savefig_path + r'/densities.pdf')
@@ -227,7 +251,7 @@ def plot_luminosity_distance_of_z():
 
     ax.set_title(r'Luminosity distance $d_L / z$', fontsize=16)
     ax.errorbar(z, luminosity_distance_of_z / z, ls='', marker='o', ms=3, yerr=luminosity_error/z, ecolor='k', capsize=0, color="k", label=r'Supernovadata')
-    ax.plot(z_of_x, luminosity_distance_of_x / (z_of_x*parsec*1e9), color='r', label='Theoretical')
+    ax.plot(z_of_x, luminosity_distance_of_x / (z_of_x*parsec*1e9), color='r', label='Theoretical', lw=2)
 
     ax.set_xlim(1.1*z[0], 1.1*z[-1])
     ax.set_ylim(4, 8)
@@ -235,6 +259,7 @@ def plot_luminosity_distance_of_z():
     ax.set_xlabel('Redshift z', fontsize=16)
     ax.set_ylabel(r'$d_L$/z (Gpc)', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.grid(True)
 
     ax.legend(prop={'size': 14}, frameon=False)
     fig.tight_layout()
@@ -269,7 +294,6 @@ def plot_supernovadata_MCMC_fits():
     fig.tight_layout()
     plt.savefig(savefig_path + r'/supernovadata_MCMC_fits.pdf')
     plt.show()
-
 
 def plot_posterior_PDF_Hubble_param():
     # H0 = h / Constants.H0_over_h, see BackgroundCosmology.cpp. PDF will be same.
@@ -330,20 +354,12 @@ def make_table(latex=False):
     z_age = z_of_x[age_index]
     t_age = (t_of_x/Gyr_to_seconds)[age_index]
 
-    # Universe accelerating (when a_double_dot is positive)
-    a_double_dot = np.exp(-x)*dHpdx_of_x*Hp_of_x
-    acc_index = np.min(np.where(a_double_dot >= 0))
-    # acc_index = find_index(x, abs(a_double_dot/np.min(a_double_dot)), step=1e-10)
-    x_acc  = x[acc_index]
-    z_acc = z_of_x[acc_index]
-    t_acc = (t_of_x/Gyr_to_seconds)[acc_index]
-
     # Make tables
-    tab_print = [['', 'x', 'z', 't (Gyr)'],
-                 ['Rad. Mat. eq', f'{x_RelM_eq:.3f}', f'{z_RelM_eq:.3f}', f'{t_RelM_eq:.3e}'],
-                 ['Mat. DE. eq', f'{x_MLambda_eq:.3f}', f'{z_MLambda_eq:.3f}', f'{t_MLambda_eq:.3f}'],
-                 ['Uni. today', f'{x_age:.3f}', f'{z_age:.3f}', f'{t_age:.3f}'],
-                 ['Uni. acc', f'{x_acc:.3f}', f'{z_acc:.3f}', f'{t_acc:.3f}']]
+    tab_print = [['Event', 'x', 'z', 't (Gyr)'],
+                 ['Radiation-Matter equality', f'{x_RelM_eq:.3f}', f'{z_RelM_eq:.3f}', f'{t_RelM_eq:.3e}'],
+                 ['Matter-Dark Energy equality', f'{x_MLambda_eq:.3f}', f'{z_MLambda_eq:.3f}', f'{t_MLambda_eq:.3f}'],
+                 ['Universe accelerate', f'{x_acc:.3f}', f'{z_acc:.3f}', f'{t_acc:.3f}'],
+                 ['Today', f'{x_age:.3f}', f'{z_age:.3f}', f'{t_age:.3f}']]
 
     tab_data = tab.tabulate(tab_print, tablefmt="simple_grid")
     print(tab_data)
@@ -353,11 +369,11 @@ def make_table(latex=False):
         # Latex table
         print('Beautiful LateX-table, just for you! (double check small values)')
         print('================================================================\n')
-        tab_data_latex = txt.Texttable()
+        tab_data_latex = txttab.Texttable()
         tab_data_latex.set_cols_align(["l", "c", "c", "c"])
         tab_data_latex.add_rows(tab_print)
         print(lt.draw_latex(tab_data_latex))
-
+# End of plotting functions 
 
 
 # Scaling factor instead of x may be more intuitive
@@ -365,33 +381,46 @@ a = np.exp(x)
 h_best_fit = 0.70189
 H0_over_h = 100
 H0_best_fit = H0_over_h * h_best_fit
+today_index = find_index(x, abs(x))
 
 # # Define shorthand for these sums 
 OmegaRel = OmegaR + OmegaNu
 OmegaM = OmegaB + OmegaCDM
 
-# Find density parameters domination. Defined to be dominating if 0.75% is left. 
-percent_for_domination = 0.75
-Rel_dom = abs(OmegaRel - percent_for_domination)
+# Find density parameters domination. Defined to be dominating if 50% is quantity. 
+percent_for_domination = 0.5
 M_dom = abs(OmegaM - percent_for_domination)
+Lambda_dom = abs(OmegaLambda - percent_for_domination)
 
-index_Rel_dom = find_index(x, Rel_dom, start=-10, end=-5)
-index_M_dom = find_index(x, M_dom, start=-1, end=1)
+index_M_dom = find_index(x, M_dom, start=-10, end=-5)
+index_Lambda_dom = find_index(x, Lambda_dom, start=-1, end=1)
 
 # These are needed for plotting
-x_RelM_dom = x[index_Rel_dom]
-x_MLambda_dom = x[index_M_dom]
+x_M_dom = x[index_M_dom]
+x_Lambda_dom = x[index_Lambda_dom]
+
+# Universe accelerating (when a_double_dot is positive)
+a_double_dot = np.exp(-x)*dHpdx_of_x*Hp_of_x
+acc_index = np.min(np.where(a_double_dot >= 0))
+# acc_index = find_index(x, abs(a_double_dot/np.min(a_double_dot)), step=1e-10)
+x_acc  = x[acc_index]
+z_acc = z_of_x[acc_index]
+t_acc = (t_of_x/Gyr_to_seconds)[acc_index]
+
+print(OmegaLambda[acc_index])
+print(OmegaR[acc_index])
+print(OmegaM[acc_index])
 
 # Control unit for plotting 
-plot_demonstrate_code()
-plot_conformal_Hubble()
-plot_conformal_time_pr_c()
-plot_time()
-plot_densities()
-plot_luminosity_distance_of_z()
-plot_supernovadata_MCMC_fits()
-plot_posterior_PDF_Hubble_param()
-plot_posterior_PDF_OmegaLambda()
+# plot_demonstrate_code()
+# plot_conformal_Hubble()
+# plot_conformal_time()
+# plot_time()
+# plot_densities()
+# plot_luminosity_distance_of_z()
+# plot_supernovadata_MCMC_fits()
+# plot_posterior_PDF_Hubble_param()
+# plot_posterior_PDF_OmegaLambda()
 
-# make_table(latex=True)
+# make_table(latex=False)
 
