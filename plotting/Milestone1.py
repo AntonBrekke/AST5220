@@ -70,11 +70,11 @@ class make_plot:
             plt.setp(patch, 'facecolor', color)
         self.ax.tick_params(axis='both', which='major', labelsize=14)
         # # Normalizer 
-        # norm = mpl.colors.Normalize(vmin=np.min(self.n), vmax=np.max(self.n)) 
-        # # creating ScalarMappable 
-        # sm = plt.cm.ScalarMappable(cmap=cm, norm=norm) 
-        # sm.set_array([]) 
-        # # plt.colorbar(sm, ax=self.ax, ticks=np.linspace(np.min(self.n), np.max(self.n), 5), format=lambda x, pos: f'{x:.1f}') 
+        norm = mpl.colors.Normalize(vmin=np.min(self.n), vmax=np.max(self.n)) 
+        # creating ScalarMappable 
+        sm = plt.cm.ScalarMappable(cmap=cm, norm=norm) 
+        sm.set_array([]) 
+        plt.colorbar(sm, ax=self.ax, ticks=np.linspace(np.min(self.n), np.max(self.n), 5), format=lambda x, pos: f'{x:.1f}') 
         if label != '':
             self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready
@@ -355,7 +355,7 @@ def make_table(latex=False):
     t_age = (t_of_x/Gyr_to_seconds)[age_index]
 
     # Make tables
-    tab_print = [['Event', 'x', 'z', 't (Gyr)'],
+    tab_print = [['Event', '$x$', '$z$', '$t$ (Gyr)'],
                  ['Radiation-Matter equality', f'{x_RelM_eq:.3f}', f'{z_RelM_eq:.3f}', f'{t_RelM_eq:.3e}'],
                  ['Matter-Dark Energy equality', f'{x_MLambda_eq:.3f}', f'{z_MLambda_eq:.3f}', f'{t_MLambda_eq:.3f}'],
                  ['Universe accelerate', f'{x_acc:.3f}', f'{z_acc:.3f}', f'{t_acc:.3f}'],
@@ -419,7 +419,7 @@ print(OmegaM[acc_index])
 # plot_densities()
 # plot_luminosity_distance_of_z()
 # plot_supernovadata_MCMC_fits()
-# plot_posterior_PDF_Hubble_param()
+plot_posterior_PDF_Hubble_param()
 # plot_posterior_PDF_OmegaLambda()
 
 # make_table(latex=False)
