@@ -70,23 +70,25 @@ class make_plot:
             plt.setp(patch, 'facecolor', color)
         self.ax.tick_params(axis='both', which='major', labelsize=14)
         # # Normalizer 
-        norm = mpl.colors.Normalize(vmin=np.min(self.n), vmax=np.max(self.n)) 
+        norm = mpl.colors.Normalize(vmin=np.min(self.counts), vmax=np.max(self.counts)) 
         # creating ScalarMappable 
         sm = plt.cm.ScalarMappable(cmap=cm, norm=norm) 
-        sm.set_array([]) 
-        plt.colorbar(sm, ax=self.ax, ticks=np.linspace(np.min(self.n), np.max(self.n), 5), format=lambda x, pos: f'{x:.1f}') 
+        sm.set_array([])
+        cbar_ax = self.fig.add_axes([0.64, 0.8, 0.3, 0.02]) 
+        cbar = plt.colorbar(sm, cax=cbar_ax, ticks=np.linspace(np.min(self.counts), np.max(self.counts), 6), format=lambda x, pos: f'{x:.0f}', cmap='Spectral_r', orientation='horizontal') 
+        cbar.ax.tick_params(labelsize=12)
         if label != '':
             self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready
 
-    def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', grid=False, **scalekwargs):
+    def format_plot(self, xlabel='', ylabel='', xscale='linear', yscale='linear', grid=False, tight=True, **scalekwargs):
         self.ax.set_xlabel(xlabel, fontsize=16)
         self.ax.set_ylabel(ylabel, fontsize=16)
         self.ax.set_xscale(xscale, **scalekwargs)
         self.ax.set_yscale(yscale, **scalekwargs)
         self.ax.set_xlim(self.x_start, self.x_end)
         self.ax.grid(grid)
-        self.fig.tight_layout()
+        if tight is True: self.fig.tight_layout()
 # End of class 
 
 
@@ -308,11 +310,12 @@ def plot_posterior_PDF_Hubble_param():
     mu = np.mean(H0)
     gaussian = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-(bins-mu)**2/(2*sigma**2))
     posterior_H0_pdf.plot(bins, gaussian, color='k', lw=2.5)
-    posterior_H0_pdf.ax.axvline(H0_best_fit, color='k', ls='--', lw=2.5, label=r'Best fit value of $H_0$')
+    posterior_H0_pdf.ax.axvline(H0_best_fit, color='k', ls='--', lw=2, label=r'Best fit value of $H_0$')
+    posterior_H0_pdf.ax.axvline(mu, color='k', ls='-', lw=2)
     posterior_H0_pdf.ax.legend(prop={'size':14}, frameon=False)
+    # print(mu, H0_best_fit)
 
-    posterior_H0_pdf.format_plot(xlabel=r'$H_0$')
-    posterior_H0_pdf.fig.tight_layout()
+    posterior_H0_pdf.format_plot(xlabel=r'$H_0$', tight=True)
     plt.savefig(savefig_path + r'/posterior_PDF_Hubble_param.pdf')
     plt.show()
 
@@ -419,7 +422,7 @@ print(OmegaM[acc_index])
 # plot_densities()
 # plot_luminosity_distance_of_z()
 # plot_supernovadata_MCMC_fits()
-plot_posterior_PDF_Hubble_param()
+# plot_posterior_PDF_Hubble_param()
 # plot_posterior_PDF_OmegaLambda()
 
 # make_table(latex=False)
