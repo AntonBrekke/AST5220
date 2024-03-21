@@ -77,6 +77,7 @@ void ODESolver::solve(
   gsl_odeiv2_system ode_system = {ode_equation, jacobian, size_t(yinitial.size()), parameters};
   gsl_odeiv2_driver* ode_driver = gsl_odeiv2_driver_alloc_y_new (&ode_system, stepper, std::abs(hstart) * sign, abserr, relerr);
 
+
   // Initialize with the initial condition
   double x = xarr[0];
   Vector y(yinitial);

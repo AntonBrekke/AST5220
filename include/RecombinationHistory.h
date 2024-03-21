@@ -27,6 +27,18 @@ class RecombinationHistory{
   
     // Xe for when to switch between Saha and Peebles
     const double Xe_saha_limit = 0.99;
+    // Conversion constants 
+    double toGyr = 1.0/(1e9*365*24*60*60);  // Conversion from [s] to [Gyr]
+    double toMyr = 1.0/(1e6*365*24*60*60);  // Conversion from [s] to [Myr]
+    double toMpc = 3.24077929e-23;    // Conversion from [m] to [Mpc]
+    // Constants from cosmology class
+    double OmegaB; 
+    double TCMB;
+    double H0;
+    double rho_c0;   // Critical density today
+    void set_cosmological_constants();
+
+
 
     //===============================================================
     // [1] Computation of Xe (Saha and Peebles equation)
@@ -49,9 +61,14 @@ class RecombinationHistory{
     void solve_for_optical_depth_tau();
 
     // Splines contained in this class
-    Spline log_Xe_of_x_spline{"Xe"};
+    Spline Xe_of_x_spline{"Xe"};
+    Spline XeSaha_of_x_spline{"XeSaha"};
+    Spline ne_of_x_spline{"ne"};
     Spline tau_of_x_spline{"tau"}; 
-    Spline g_tilde_of_x_spline{"g"};  
+    Spline dtaudx_of_x_spline{"dtaudx"};
+    Spline g_tilde_of_x_spline{"g"}; 
+    Spline dg_tildedx_of_x_spline{"dgdx"};
+    Spline s_of_x_spline{"s"};
 
   public:
 
@@ -79,6 +96,8 @@ class RecombinationHistory{
     double ddgddx_tilde_of_x(double x) const;
     double Xe_of_x(double x) const;
     double ne_of_x(double x) const;
+    double nb_of_x(double x) const;
+    double nH_of_x(double x) const;
     double get_Yp() const;
 };
 
