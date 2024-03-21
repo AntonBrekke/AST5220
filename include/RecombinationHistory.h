@@ -47,9 +47,6 @@ class RecombinationHistory{
     // Compute Xe from the Saha equation
     std::pair<double,double> electron_fraction_from_saha_equation(double x) const;
     
-    // Right hand side of the dXedx Peebles equation
-    int rhs_peebles_ode(double x, const double *y, double *dydx);
-    
     // Solve for Xe 
     void solve_number_density_electrons();
     
@@ -59,6 +56,13 @@ class RecombinationHistory{
 
     // The two things we need to solve: Xe/ne and tau
     void solve_for_optical_depth_tau();
+
+    //===============================================================
+    // [3] Compute sound horizon functions
+    //===============================================================
+
+    // Compute s from integral
+    void solve_for_sound_horizon();
 
     // Splines contained in this class
     Spline Xe_of_x_spline{"Xe"};
@@ -98,6 +102,9 @@ class RecombinationHistory{
     double ne_of_x(double x) const;
     double nb_of_x(double x) const;
     double nH_of_x(double x) const;
+    double R_of_x(double x) const;
+    double cs_of_x(double x) const;
+    double s_of_x(double x) const;
     double get_Yp() const;
 };
 
