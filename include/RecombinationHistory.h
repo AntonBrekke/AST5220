@@ -47,6 +47,9 @@ class RecombinationHistory{
     // Compute Xe from the Saha equation
     std::pair<double,double> electron_fraction_from_saha_equation(double x) const;
     
+    // Right hand side of the dXedx Peebles equation
+    int rhs_peebles_ode(double x, const double *y, double *dydx);
+
     // Solve for Xe 
     void solve_number_density_electrons();
     
@@ -99,6 +102,7 @@ class RecombinationHistory{
     double dgdx_tilde_of_x(double x) const;
     double ddgddx_tilde_of_x(double x) const;
     double Xe_of_x(double x) const;
+    double XeSaha_of_x(double x) const;
     double ne_of_x(double x) const;
     double nb_of_x(double x) const;
     double nH_of_x(double x) const;
