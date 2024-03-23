@@ -7,7 +7,7 @@ import texttable as txttab
 
 # Relevant paths to get data
 path = r'/home/antonabr/AST5220/data'
-savefig_path = r'/home/antonabr/AST5220/figures/Milestone1'
+savefig_path = r'/home/antonabr/AST5220/figures/Milestone2'
 
 # Changing standard color cycle to preferred cycle  
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -26,7 +26,6 @@ c = scc.c       # m/s
 parsec = scc.parsec     # 1 parsec in m
 Myr_to_seconds = 365*24*60*60*1e6
 m_to_Mpc = 1 / (1e6*parsec)             
-
 
 # Function which finds index of data
 def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
@@ -59,9 +58,23 @@ def plot_fractional_electron_density():
     # Plot fractional electron density Xe
     fig = plt.figure()
     ax = fig.add_subplot()
+    ax.set_title(r'Evolution of fractional electron density $X_e$', fontsize=16)
 
-    ax.plot(x, Xe_of_x)
-    ax.plot(x, XeSaha_of_x)
+    # Plotting 
+    ax.plot(x, Xe_of_x, label=r'$X_e$', lw=2)
+    ax.plot(x, XeSaha_of_x*(XeSaha_of_x > np.min(Xe_of_x)), label=r'$X_e$ Saha', lw=2)
+
+    # Formatting 
+    # ax.set_ylim(1e-4, 2)
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.set_xlabel('x=ln(a)', fontsize=16)
+    ax.set_yscale('log')
+    ax.grid(True)
+    ax.legend(prop={'size': 14}, loc='best', frameon=False)
+    fig.tight_layout()
+
+    # Show 
+    plt.savefig(savefig_path + r'/frac_electron_density.pdf')
     plt.show()
 
 
@@ -69,27 +82,53 @@ def plot_optical_depth():
     # Plot optical depth tau
     fig = plt.figure()
     ax = fig.add_subplot()
-    ax.plot(x, tau_of_x)
-    ax.plot(x, -dtaudx_of_x)
-    ax.plot(x, ddtauddx_of_x)
+    ax.set_title(r'Evolution of optical depth $\tau$', fontsize=16)
+
+    # Plotting 
+    ax.plot(x, tau_of_x, label=r'$\tau(x)$', lw=2)
+    ax.plot(x, -dtaudx_of_x, label=r'$-\tau^\prime(x)$', lw=2)
+    ax.plot(x, ddtauddx_of_x, label=r'$\tau^{\prime\prime}(x)$', lw=2)
+
+    # Formatting
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.set_xlabel('x=ln(a)', fontsize=16)
     ax.set_yscale('log')
+    ax.grid(True)
+    ax.legend(prop={'size': 14}, loc='best', frameon=False)
+    fig.tight_layout()
+
+    # Show 
+    plt.savefig(savefig_path + r'/optical_depth.pdf')
     plt.show()
 
 def plot_visibility_function():
     # Plot visibility function g
     fig = plt.figure()
     ax = fig.add_subplot()
+    ax.set_title(r'Evolution of visibility function $\tilde g$', fontsize=16)
 
     # Normalizing each graph so they can be plottet together
     g_tilde_max = np.max(abs(g_tilde_of_x))
     dgdx_tilde_max = np.max(abs(dgdx_tilde_of_x))
     ddgddx_tilde_max = np.max(abs(ddgddx_tilde_of_x))
 
-    ax.plot(x, g_tilde_of_x / g_tilde_max)
-    ax.plot(x, dgdx_tilde_of_x / dgdx_tilde_max)
-    ax.plot(x, ddgddx_tilde_of_x / ddgddx_tilde_max)
+    # Plotting 
+    ax.plot(x, g_tilde_of_x / g_tilde_max, label=r'$\tilde g(x) / \tilde g_{\text{max}}$', lw=2)
+    ax.plot(x, dgdx_tilde_of_x / dgdx_tilde_max, label=r'$\tilde g^\prime(x) / \tilde g^\prime_{\text{max}}$', lw=2)
+    ax.plot(x, ddgddx_tilde_of_x / ddgddx_tilde_max, label=r'$\tilde g^{\prime\prime}(x) / \tilde g^{\prime\prime}_{\text{max}}$', lw=2)
     ax.set_xlim(-8, -6)
+
+    # Formatting 
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.set_xlabel('x=ln(a)', fontsize=16)
+    ax.grid(True)
+    ax.legend(prop={'size': 14}, loc='best', frameon=False)
+    fig.tight_layout()
+
+    # Show
+    plt.savefig(savefig_path + r'/visibility_function.pdf')
     plt.show()
+# End of plotting functions 
 
 def find_values(latex=False):
     # Definition of recombination
@@ -132,10 +171,11 @@ def find_values(latex=False):
         tab_data_latex.set_cols_align(["l", "c", "c", "c"])
         tab_data_latex.add_rows(tab_print)
         print(lt.draw_latex(tab_data_latex))
-# End of plotting functions 
+# End of find values 
 
+# Control unit for calling functions
 plot_fractional_electron_density()
-# plot_optical_depth()
-# plot_visibility_function()
+plot_optical_depth()
+plot_visibility_function()
 
 find_values()

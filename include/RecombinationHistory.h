@@ -70,7 +70,7 @@ class RecombinationHistory{
     // Splines contained in this class
     Spline Xe_of_x_spline{"Xe"};
     Spline XeSaha_of_x_spline{"XeSaha"};
-    Spline ne_of_x_spline{"ne"};
+    Spline log_ne_of_x_spline{"ne"};
     Spline tau_of_x_spline{"tau"}; 
     Spline dtaudx_of_x_spline{"dtaudx"};
     Spline g_tilde_of_x_spline{"g"}; 
