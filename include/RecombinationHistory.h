@@ -23,7 +23,7 @@ class RecombinationHistory{
     const double x_end    = Constants.x_end;
     
     // Numbers of points of Xe,ne array (modify as you see fit)
-    const int npts_rec_arrays = 4000;
+    const int npts_rec_arrays = 1e5;
   
     // Xe for when to switch between Saha and Peebles
     const double Xe_saha_limit = 0.99;

@@ -74,7 +74,7 @@ class make_plot:
         # creating ScalarMappable 
         sm = plt.cm.ScalarMappable(cmap=cm, norm=norm) 
         sm.set_array([])
-        cbar_ax = self.fig.add_axes([0.64, 0.8, 0.3, 0.02]) 
+        cbar_ax = self.fig.add_axes([0.64, 0.8, 0.3, 0.03]) 
         cbar = plt.colorbar(sm, cax=cbar_ax, ticks=np.linspace(np.min(self.counts), np.max(self.counts), 6), format=lambda x, pos: f'{x:.0f}', cmap='Spectral_r', orientation='horizontal') 
         cbar.ax.tick_params(labelsize=12)
         if label != '':
@@ -283,16 +283,23 @@ def plot_supernovadata_MCMC_fits():
     OmegaLambda_selected_2sigma = (1 - (OmegaM_sn + OmegaK_sn))[chi2_2sigma]
 
     line = -1*np.linspace(0, 1, len(OmegaLambda_selected_2sigma)) + 1
-    ax.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, label=r'$2\sigma$', rasterized=True)
-    ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, label=r'$1\sigma$', rasterized=True)
+    # ax.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, c=chi2_2sigma, cmap='winter', label=r'$2\sigma$', s=10, alpha=0.5, rasterized=True)
+    sigma1_plot = ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, c=chi2_1sigma, cmap='winter', label=r'$1\sigma$', s=15, alpha=0.8, rasterized=True)
     ax.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
 
+    cbar_ax = fig.add_axes([0.53, 0.25, 0.4, 0.03]) 
+    cbar = plt.colorbar(sigma1_plot, cax=cbar_ax, orientation='horizontal') 
+    cbar.ax.set_title(r'$\chi^2$', fontsize=16)
+    cbar.ax.tick_params(labelsize=12)
+
+    ax.set_xlim(0, 0.5)
+    ax.set_ylim(0.3, 1)
     ax.set_xlabel(r'$\Omega_{M}$', fontsize=16)
     ax.set_ylabel(r'$\Omega_{\Lambda}$', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.set_title('Supernovadata MCMC fits', fontsize=16)
 
-    ax.legend(prop={'size':14}, frameon=False)
+    ax.legend(prop={'size':14}, loc='center left', bbox_to_anchor=(0, 0.7), frameon=False)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/supernovadata_MCMC_fits.pdf')
     plt.show()

@@ -28,14 +28,14 @@ const double sigma_T     = Constants.sigma_T;
 const double Lambda_2s1s = Constants.lambda_2s1s;
 
 // For Saha equation to not blow up 
-const double global_tol = 1e-4;
+const double global_tol = 1e-8;
 
 // Instead of setting the same variables everywhere, I just declare them in class
 void RecombinationHistory::set_cosmological_constants(){
   OmegaB = cosmo -> get_OmegaB();
   TCMB = cosmo -> get_TCMB();
   H0 = cosmo -> get_H0();
-  rho_c0 = 3.0*H0 * H0 / (8.0 * M_PI * G);   // Value for critical density today
+  rho_c0 = 3.*H0 * H0 / (8.*M_PI*G);   // Value for critical density today
 }
 
 void RecombinationHistory::solve(){
@@ -108,7 +108,7 @@ void RecombinationHistory::solve_number_density_electrons(){
   // Fill rest of Xe_arr_saha with Saha solution 
   // Since lim K->0 K/2. * (-1 + sqrt(1 + 4./K)) = 0, we can safely return 0. 
   // when Saha-equation no longer work (negative, nan)
-  for (int i=i_last_saha + 1; i < npts_rec_arrays; i++){
+  for (int i=i_last_saha; i < npts_rec_arrays; i++){
     auto Xe_ne_data = electron_fraction_from_saha_equation(x_array[i]);
     double const Xe_current = Xe_ne_data.first;
     // Check for nan and negative values and set to zero. 
@@ -145,7 +145,7 @@ void RecombinationHistory::solve_number_density_electrons(){
   Vector log_ne_arr(npts_rec_arrays);
   for (int i=0; i < npts_rec_arrays; i++){
     log_ne_arr[i] = log(ne_arr[i]);
-  };
+  }
   
   // Spline results
   Xe_of_x_spline.create(x_array, Xe_arr, "Xe");
@@ -171,9 +171,10 @@ std::pair<double,double> RecombinationHistory::electron_fraction_from_saha_equat
   double Tb = cosmo -> get_TCMB(x);
   double nb = nb_of_x(x);
 
-  double K = 1. / nb * pow(k_b*m_e*Tb / (2.0*M_PI*pow(hbar, 2)), 1.5) * exp(-epsilon_0/(k_b*Tb));
-  if(4.0/K < global_tol)
+  double K = 1. / nb * pow(k_b*m_e*Tb / (2.*M_PI*pow(hbar, 2)), 1.5) * exp(-epsilon_0/(k_b*Tb));
+  if(4.0/K < global_tol){
     Xe = 1.0;
+  }
   else{
     Xe = K/2. * (-1 + sqrt(1 + 4./K));
   }
@@ -200,15 +201,7 @@ int RecombinationHistory::rhs_peebles_ode(double x, const double *Xe, double *dX
     const double phi2 = 0.448 * log(eps_Tb); // dimensionless
     const double alpha2 = pow(hbar, 2) / c * 64.0*M_PI*pow(alpha, 2)*phi2 / (pow(m_e, 2)) * sqrt(eps_Tb/(27.0*M_PI)); // dimension m^3/s
     const double beta = alpha2* pow(k_b*m_e*Tb/(2.0*M_PI*pow(hbar, 2)), 1.5) * exp(-eps_Tb);
-    double beta2; // dimension 1/s
-
-    // Checking for large exponent to avoid overflow
-    if (eps_Tb > 200.0){
-      beta2 = 0.0;
-    }
-    else{
-      beta2 = beta*exp(eps_Tb*3./4.); // dimension 1/s
-    }
+    const double beta2 = alpha2* pow(k_b*m_e*Tb/(2.0*M_PI*pow(hbar, 2)), 1.5) * exp(-1/4.*eps_Tb);  // dimension 1/s
 
     const double nH = rho_c0*OmegaB / (m_H * pow(a, 3)); // dimension 1/m^3. No Helium -> Y_p = 0 
     const double n1s = (1. - X_e)*nH; // dimension 1/m^3
@@ -231,9 +224,9 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
   Utils::StartTiming("opticaldepth");
 
   // Set up x-arrays to integrate over. We split into three regions as we need extra points in reionisation
-  const int npts = 1000;
+  const int npts = 1e3;
   // Want to integrate backwards in time. ODESolver need increasing values, hence minus signs. 
-  Vector x_array_rev = Utils::linspace(-x_end, -x_start, npts);
+  Vector x_array_rev = Utils::linspace(0, -x_start, npts);
 
   // The ODE system dtau/dx, dtau_noreion/dx and dtau_baryon/dx
   ODESolver tau_ode;
@@ -246,7 +239,7 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
   //=============================================================================
   // Set up and solve the ODE and make tau splines
   //=============================================================================
-  // Initial Xe will be the last added value from the Saha regime. 
+  // Set to zero, since we want tau(x=0) = 0.
   Vector tau_init_vec{0.0};
 
   tau_ode.solve(dtaudx, x_array_rev, tau_init_vec);
@@ -306,7 +299,7 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
 void RecombinationHistory::solve_for_sound_horizon(){
   Utils::StartTiming("Sound horizon");
 
-  const int npts = 1000;
+  const int npts = 1e5;
   Vector x_array = Utils::linspace(x_start, x_end, npts);
 
   // Set up ODE for sound horizon
@@ -367,7 +360,7 @@ double RecombinationHistory::ne_of_x(double x) const{
 }
 
 double RecombinationHistory::nb_of_x(double x) const{
-  return OmegaB * rho_c0 / m_H * exp(-3.0*x);
+  return OmegaB * rho_c0 / m_H * exp(-3.*x);
 }
 
 double RecombinationHistory::nH_of_x(double x) const{
@@ -375,7 +368,7 @@ double RecombinationHistory::nH_of_x(double x) const{
 }
 
 double RecombinationHistory::R_of_x(double x) const{
-  return (3.0 * cosmo -> get_OmegaB(x))/(4.0*cosmo -> get_OmegaR(x));
+  return (3. * cosmo -> get_OmegaB(x))/(4.*cosmo -> get_OmegaR(x));
 }
 
 double RecombinationHistory::cs_of_x(double x) const{
@@ -406,7 +399,7 @@ void RecombinationHistory::info() const{
 //====================================================
 void RecombinationHistory::output(const std::string filename) const{
   std::ofstream fp(filename.c_str());
-  const int npts       = 5000;
+  const int npts       = 1e5;
   const double x_min   = -12;
   const double x_max   = 0;
 

@@ -62,10 +62,11 @@ def plot_fractional_electron_density():
 
     # Plotting 
     ax.plot(x, Xe_of_x, label=r'$X_e$', lw=2)
-    ax.plot(x, XeSaha_of_x*(XeSaha_of_x > np.min(Xe_of_x)), label=r'$X_e$ Saha', lw=2)
+    ax.plot(x, XeSaha_of_x*(XeSaha_of_x > np.min(Xe_of_x)), label=r'$X_e$ (Saha)', lw=2, ls='--')
 
     # Formatting 
-    # ax.set_ylim(1e-4, 2)
+    ax.set_xlim(-8, -4)
+    ax.set_ylim(1.7e-4, 2)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.set_xlabel('x=ln(a)', fontsize=16)
     ax.set_yscale('log')
@@ -90,6 +91,8 @@ def plot_optical_depth():
     ax.plot(x, ddtauddx_of_x, label=r'$\tau^{\prime\prime}(x)$', lw=2)
 
     # Formatting
+    ax.set_xlim(-10, -4)
+    ax.set_ylim(1e-5, 1e5)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.set_xlabel('x=ln(a)', fontsize=16)
     ax.set_yscale('log')
@@ -113,12 +116,12 @@ def plot_visibility_function():
     ddgddx_tilde_max = np.max(abs(ddgddx_tilde_of_x))
 
     # Plotting 
-    ax.plot(x, g_tilde_of_x / g_tilde_max, label=r'$\tilde g(x) / \tilde g_{\text{max}}$', lw=2)
-    ax.plot(x, dgdx_tilde_of_x / dgdx_tilde_max, label=r'$\tilde g^\prime(x) / \tilde g^\prime_{\text{max}}$', lw=2)
-    ax.plot(x, ddgddx_tilde_of_x / ddgddx_tilde_max, label=r'$\tilde g^{\prime\prime}(x) / \tilde g^{\prime\prime}_{\text{max}}$', lw=2)
-    ax.set_xlim(-8, -6)
+    ax.plot(x, g_tilde_of_x / g_tilde_max, label=r'$\tilde g(x) / |\tilde g|_{\text{max}}$', lw=2)
+    ax.plot(x, dgdx_tilde_of_x / dgdx_tilde_max, label=r'$\tilde g^\prime(x) / |\tilde g^\prime|_{\text{max}}$', lw=2)
+    ax.plot(x, ddgddx_tilde_of_x / ddgddx_tilde_max, label=r'$\tilde g^{\prime\prime}(x) / |\tilde g^{\prime\prime}|_{\text{max}}$', lw=2)
 
     # Formatting 
+    ax.set_xlim(-8, -6)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.set_xlabel('x=ln(a)', fontsize=16)
     ax.grid(True)
@@ -141,8 +144,7 @@ def find_values(latex=False):
     s_recombination = s_of_x[recombination_index] * m_to_Mpc
 
     # Definition of last scattering 
-    tau_last_scattering = 1
-    last_scatter_index = find_index(x, abs(tau_of_x - tau_last_scattering))
+    last_scatter_index = np.where(g_tilde_of_x == np.max(g_tilde_of_x))[0][0]
 
     x_last_scatter = x[last_scatter_index]
     t_last_scatter = (t_of_x / Myr_to_seconds)[last_scatter_index]
@@ -156,8 +158,8 @@ def find_values(latex=False):
 
     # Make tables
     tab_print = [['Event', '$x$', '$z$', '$t$ (Myr)', '$r_s$ (Mpc)'],
-                 ['Recombination', f'{x_recombination:.3f}', f'{z_recombination:.3f}', f'{t_recombination:.3f}', f'{s_recombination:.3f}'],
-                 ['Last scatter', f'{x_last_scatter:.3f}', f'{z_last_scatter:.3f}', f'{t_last_scatter:.3f}', f'{s_last_scatter:.3f}']]
+                 ['Recombination', f'{x_recombination:.4f}', f'{z_recombination:.4f}', f'{t_recombination:.4f}', f'{s_recombination:.4f}'],
+                 ['Last scatter', f'{x_last_scatter:.4f}', f'{z_last_scatter:.4f}', f'{t_last_scatter:.4f}', f'{s_last_scatter:.4f}']]
 
     tab_data = tab.tabulate(tab_print, tablefmt="simple_grid")
     print(tab_data)
