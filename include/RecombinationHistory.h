@@ -36,9 +36,6 @@ class RecombinationHistory{
     double TCMB;
     double H0;
     double rho_c0;   // Critical density today
-    void set_cosmological_constants();
-
-
 
     //===============================================================
     // [1] Computation of Xe (Saha and Peebles equation)

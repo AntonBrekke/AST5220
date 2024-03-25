@@ -27,32 +27,21 @@ parsec = scc.parsec     # 1 parsec in m
 Myr_to_seconds = 365*24*60*60*1e6
 m_to_Mpc = 1 / (1e6*parsec)             
 
-# Function which finds index of data
-def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
-    """
-    data: array you want index for. 
-    condition: abs(F - value). 
-    start, end: limit domain of search.
-    eps: treshold for acceptance. 
-    step: make treshold smaller each iteration.
-    return -> index for data when F = value  
-    """
-    if start is None: start = np.min(data)
-    if end is None: end = np.max(data)
-    domain = (data > start) * (data < end)
-    condition = condition[domain]
-    index_satisfied_condition = np.where(condition < eps)[0]
-    N_satisfied_condition = len(index_satisfied_condition)
-
-    while N_satisfied_condition > 1:
-        eps -= step 
-        index_satisfied_condition = np.where(condition < eps)[0]
-        N_satisfied_condition = len(index_satisfied_condition)
-    if N_satisfied_condition < 1: raise Exception("Could not find single value.")
-    
-    index = np.where(data[domain][index_satisfied_condition] == data)[0]
-    return index[0]
+# Less scuffed version of last index-finder (Milestone 1)
+def find_index(data, x=None, value=0, x_start=None, x_end=None):
+    if x is None:
+        index = np.where(np.min(abs(data - value)) == abs(data - value))[0][0]
+        return index
+    else: # Specify what data is function of - used if data = value at multiple values places 
+        if x_start is None: x_start = np.min(x)
+        if x_end is None: x_end = np.max(x)
+        domain = (x >= x_start) * (x <= x_end)
+        data_domain = data[domain]
+        index = np.where(np.min(abs(data_domain - value)) == abs(data_domain - value))[0][0]
+        index = len(x[(x <= x_start)]) + index      # Translate to index on original domain
+        return index
 # End of index-function
+
 
 def plot_fractional_electron_density():
     # Plot fractional electron density Xe
@@ -62,11 +51,13 @@ def plot_fractional_electron_density():
 
     # Plotting 
     ax.plot(x, Xe_of_x, label=r'$X_e$', lw=2)
-    ax.plot(x, XeSaha_of_x*(XeSaha_of_x > np.min(Xe_of_x)), label=r'$X_e$ (Saha)', lw=2, ls='--')
+    ax.plot(x, XeSaha_of_x, label=r'$X_e$ (Saha)', lw=2, ls='--')
+    ax.axvline(x_recombination, color='k', label='Recombination', ls='--')
+    ax.axhline(Xe_freeze_out, color='purple', label='Freeze-out', ls='-.')
 
     # Formatting 
     ax.set_xlim(-8, -4)
-    ax.set_ylim(1.7e-4, 2)
+    ax.set_ylim(1e-4, 1.25)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.set_xlabel('x=ln(a)', fontsize=16)
     ax.set_yscale('log')
@@ -119,6 +110,7 @@ def plot_visibility_function():
     ax.plot(x, g_tilde_of_x / g_tilde_max, label=r'$\tilde g(x) / |\tilde g|_{\text{max}}$', lw=2)
     ax.plot(x, dgdx_tilde_of_x / dgdx_tilde_max, label=r'$\tilde g^\prime(x) / |\tilde g^\prime|_{\text{max}}$', lw=2)
     ax.plot(x, ddgddx_tilde_of_x / ddgddx_tilde_max, label=r'$\tilde g^{\prime\prime}(x) / |\tilde g^{\prime\prime}|_{\text{max}}$', lw=2)
+    ax.axvline(x_last_scatter, color='k', label='Last scattering', ls='--')
 
     # Formatting 
     ax.set_xlim(-8, -6)
@@ -136,7 +128,8 @@ def plot_visibility_function():
 def find_values(latex=False):
     # Definition of recombination
     Xe_recombination = 0.1
-    recombination_index = find_index(x, abs(Xe_of_x - Xe_recombination))
+    recombination_index = find_index(Xe_of_x, value=Xe_recombination)
+    # print(Xe_of_x[recombination_index])     # Check
 
     x_recombination = x[recombination_index]
     t_recombination = (t_of_x / Myr_to_seconds)[recombination_index]
@@ -144,7 +137,7 @@ def find_values(latex=False):
     s_recombination = s_of_x[recombination_index] * m_to_Mpc
 
     # Definition of last scattering 
-    last_scatter_index = np.where(g_tilde_of_x == np.max(g_tilde_of_x))[0][0]
+    last_scatter_index = find_index(g_tilde_of_x, value=np.max(g_tilde_of_x))
 
     x_last_scatter = x[last_scatter_index]
     t_last_scatter = (t_of_x / Myr_to_seconds)[last_scatter_index]
@@ -152,32 +145,36 @@ def find_values(latex=False):
     s_last_scatter = s_of_x[last_scatter_index] * m_to_Mpc
 
     # Definition of freeze-out
-    freeze_out_index = find_index(Xe_of_x, abs(x))
+    freeze_out_index = find_index(x, value=0)
     Xe_freeze_out = Xe_of_x[freeze_out_index]
+    # print(x[freeze_out_index])      # Check
 
 
     # Make tables
+    p = 5
     tab_print = [['Event', '$x$', '$z$', '$t$ (Myr)', '$r_s$ (Mpc)'],
-                 ['Recombination', f'{x_recombination:.4f}', f'{z_recombination:.4f}', f'{t_recombination:.4f}', f'{s_recombination:.4f}'],
-                 ['Last scatter', f'{x_last_scatter:.4f}', f'{z_last_scatter:.4f}', f'{t_last_scatter:.4f}', f'{s_last_scatter:.4f}']]
+                 ['Recombination', f'{x_recombination:.{p}f}', f'{z_recombination:.{p}f}', f'{t_recombination:.{p}f}', f'{s_recombination:.{p}f}'],
+                 ['Last scatter', f'{x_last_scatter:.{p}f}', f'{z_last_scatter:.{p}f}', f'{t_last_scatter:.{p}f}', f'{s_last_scatter:.{p}f}']]
 
     tab_data = tab.tabulate(tab_print, tablefmt="simple_grid")
     print(tab_data)
-    print(f'Freeze-out abundance free electrons: {Xe_freeze_out:.3e}\n')
+    print(f'Freeze-out abundance free electrons: {Xe_freeze_out:.{p}e}\n')
     
     if latex is True:
         # Latex table
         print('Beautiful LateX-table, just for you! (double check small values)')
         print('================================================================\n')
         tab_data_latex = txttab.Texttable()
-        tab_data_latex.set_cols_align(["l", "c", "c", "c"])
+        tab_data_latex.set_cols_align(["l", "c", "c", "c", "c"])
         tab_data_latex.add_rows(tab_print)
         print(lt.draw_latex(tab_data_latex))
+
+    return [x_recombination, x_last_scatter, Xe_freeze_out]
 # End of find values 
+
+x_recombination, x_last_scatter, Xe_freeze_out = find_values(latex=False)
 
 # Control unit for calling functions
 plot_fractional_electron_density()
 plot_optical_depth()
 plot_visibility_function()
-
-find_values()

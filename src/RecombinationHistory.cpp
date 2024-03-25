@@ -28,21 +28,15 @@ const double sigma_T     = Constants.sigma_T;
 const double Lambda_2s1s = Constants.lambda_2s1s;
 
 // For Saha equation to not blow up 
-const double global_tol = 1e-8;
-
-// Instead of setting the same variables everywhere, I just declare them in class
-void RecombinationHistory::set_cosmological_constants(){
-  OmegaB = cosmo -> get_OmegaB();
-  TCMB = cosmo -> get_TCMB();
-  H0 = cosmo -> get_H0();
-  rho_c0 = 3.*H0 * H0 / (8.*M_PI*G);   // Value for critical density today
-}
+const double saha_tol = 1e-7;
 
 void RecombinationHistory::solve(){
 
   // Set cosmological constants
-  set_cosmological_constants();
-  std::cout << "Set cosmological constants\n";
+  OmegaB = cosmo -> get_OmegaB();
+  TCMB = cosmo -> get_TCMB();
+  H0 = cosmo -> get_H0();   // Returns constant H0 
+  rho_c0 = 3.*pow(H0, 2.) / (8.*M_PI*G);   // Value for critical density today
   
   // Compute and spline Xe, ne
 
@@ -108,24 +102,25 @@ void RecombinationHistory::solve_number_density_electrons(){
   // Fill rest of Xe_arr_saha with Saha solution 
   // Since lim K->0 K/2. * (-1 + sqrt(1 + 4./K)) = 0, we can safely return 0. 
   // when Saha-equation no longer work (negative, nan)
-  for (int i=i_last_saha; i < npts_rec_arrays; i++){
+  for (int i=i_last_saha + 1; i < npts_rec_arrays; i++){
     auto Xe_ne_data = electron_fraction_from_saha_equation(x_array[i]);
     double const Xe_current = Xe_ne_data.first;
     // Check for nan and negative values and set to zero. 
-    double Xe_current_non_neg_zero_nan = Xe_current < global_tol || std::isnan(Xe_current) ? 0.0 : Xe_current;
+    double Xe_current_non_neg_zero_nan = Xe_current < saha_tol || std::isnan(Xe_current) ? 0.0 : Xe_current;
     Xe_saha_arr[i] = Xe_current_non_neg_zero_nan;
   }
 
   // Make an array with x-values that has not been solved for,
   // to be solved using Peebles equation
-  const int npts_ode_array = npts_rec_arrays - i_last_saha;
+  const int npts_ode_array = npts_rec_arrays - (i_last_saha + 1);   // Be careful with npts vs. indices! npts_solved = index + 1
   Vector x_array_ode(npts_ode_array);
   for (int j=0; j < npts_ode_array; j++){
-    x_array_ode[j] = x_array[j + i_last_saha];
+    x_array_ode[j] = x_array[j + (i_last_saha + 1)];
   }
 
   // The Peebles ODE equation
   ODESolver peebles_Xe_ode;
+  
   ODEFunction dXedx = [&](double x, const double *Xe, double *dXedx){
     return rhs_peebles_ode(x, Xe, dXedx);
   };
@@ -136,9 +131,9 @@ void RecombinationHistory::solve_number_density_electrons(){
   
   peebles_Xe_ode.solve(dXedx, x_array_ode, Xe_init_vec);
   auto Xe_ode = peebles_Xe_ode.get_data_by_component(0);
-  for (int j=i_last_saha; j < npts_rec_arrays; j++){
-    Xe_arr[j] = Xe_ode[j - i_last_saha];
-    ne_arr[j] = Xe_ode[j - i_last_saha] * nH_of_x(x_array[j]);
+  for (int j=i_last_saha + 1; j < npts_rec_arrays; j++){
+    Xe_arr[j] = Xe_ode[j - (i_last_saha + 1)];
+    ne_arr[j] = Xe_ode[j - (i_last_saha + 1)] * nH_of_x(x_array[j]);
     }
  
   // Make log arrays, as they are easier to spline (ne jumps in several orders of magnitude)
@@ -171,12 +166,12 @@ std::pair<double,double> RecombinationHistory::electron_fraction_from_saha_equat
   double Tb = cosmo -> get_TCMB(x);
   double nb = nb_of_x(x);
 
-  double K = 1. / nb * pow(k_b*m_e*Tb / (2.*M_PI*pow(hbar, 2)), 1.5) * exp(-epsilon_0/(k_b*Tb));
-  if(4.0/K < global_tol){
+  double M = 1. / nb * pow(k_b*m_e*Tb / (2.*M_PI*pow(hbar, 2)), 1.5) * exp(-epsilon_0/(k_b*Tb));
+  if(4.0/M < saha_tol){
     Xe = 1.0;
   }
   else{
-    Xe = K/2. * (-1 + sqrt(1 + 4./K));
+    Xe = M/2. * (-1 + sqrt(1 + 4./M));
   }
 
   const double nH = nH_of_x(x);
@@ -189,23 +184,21 @@ std::pair<double,double> RecombinationHistory::electron_fraction_from_saha_equat
 int RecombinationHistory::rhs_peebles_ode(double x, const double *Xe, double *dXedx){
     // Current value of a and X_e
     const double X_e = Xe[0];
-    const double a = exp(x);
 
     // Constants for finding RHS of peebles eq.
     const double Tb = cosmo -> get_TCMB(x);
     const double H = cosmo -> H_of_x(x);
     const double eps_Tb = epsilon_0 / (k_b*Tb);
-    const double alpha = c / hbar*sqrt(3.0*sigma_T/(8.0*M_PI))*m_e; // Dimensionless fine structure constant. 
     
     // Write down all terms/constants involved in RHS 
     const double phi2 = 0.448 * log(eps_Tb); // dimensionless
-    const double alpha2 = pow(hbar, 2) / c * 64.0*M_PI*pow(alpha, 2)*phi2 / (pow(m_e, 2)) * sqrt(eps_Tb/(27.0*M_PI)); // dimension m^3/s
-    const double beta = alpha2* pow(k_b*m_e*Tb/(2.0*M_PI*pow(hbar, 2)), 1.5) * exp(-eps_Tb);
-    const double beta2 = alpha2* pow(k_b*m_e*Tb/(2.0*M_PI*pow(hbar, 2)), 1.5) * exp(-1/4.*eps_Tb);  // dimension 1/s
+    const double alpha2 = 8. / sqrt(3*M_PI) * c*sigma_T * sqrt(eps_Tb)*phi2; // dimension m^3/s
+    const double beta = alpha2* pow(k_b*m_e*Tb / (2.0*M_PI*pow(hbar, 2)), 3./2) * exp(-eps_Tb);
+    const double beta2 = alpha2* pow(k_b*m_e*Tb / (2.0*M_PI*pow(hbar, 2)), 3./2) * exp(-1./4*eps_Tb);  // dimension 1/s
 
-    const double nH = rho_c0*OmegaB / (m_H * pow(a, 3)); // dimension 1/m^3. No Helium -> Y_p = 0 
+    const double nH = OmegaB * rho_c0 / m_H * exp(-3.*x); // dimension 1/m^3. No Helium -> Y_p = 0 
     const double n1s = (1. - X_e)*nH; // dimension 1/m^3
-    const double Lambda_alpha = H * pow(3*epsilon_0, 3) / (pow(hbar*c, 3)) / (pow(8*M_PI, 2) * n1s); // dimension 1/s
+    const double Lambda_alpha = H * pow(3*epsilon_0, 3) / (pow(hbar*c, 3) * pow(8.*M_PI, 2) * n1s); // dimension 1/s
     const double Cr = (Lambda_2s1s + Lambda_alpha) / (Lambda_2s1s + Lambda_alpha + beta2); // dimensionless
 
     const double rhs = Cr/H * (beta*(1. - X_e) - nH*alpha2*pow(X_e, 2));
@@ -277,14 +270,14 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
     g_tilde[i] = -dtaudx_of_x(x_i) * exp(-tau_of_x(x_i));
   }
 
-  // Make dgtildedx vector 
+  // Make dgtildedx vector, since double deriv of spline could be ugly 
   Vector dg_tildedx(npts);
   for(int i=0; i < npts; i++){
     double x_i = x_array[i];
     dg_tildedx[i] = exp(-tau_of_x(x_i)) * (dtaudx_of_x(x_i)*dtaudx_of_x(x_i) - ddtauddx_of_x(x_i));
   }
   
-  // Spline results 
+  // Spline results. Make spline of dgdx as well, since double deriv of spline could be ugly 
   g_tilde_of_x_spline.create(x_array, g_tilde, "g");
   dg_tildedx_of_x_spline.create(x_array, dg_tildedx, "dgdx");
 

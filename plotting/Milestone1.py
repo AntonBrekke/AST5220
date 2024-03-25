@@ -284,7 +284,7 @@ def plot_supernovadata_MCMC_fits():
 
     line = -1*np.linspace(0, 1, len(OmegaLambda_selected_2sigma)) + 1
     # ax.scatter(OmegaM_selected_2sigma, OmegaLambda_selected_2sigma, c=chi2_2sigma, cmap='winter', label=r'$2\sigma$', s=10, alpha=0.5, rasterized=True)
-    sigma1_plot = ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, c=chi2_1sigma, cmap='winter', label=r'$1\sigma$', s=15, alpha=0.8, rasterized=True)
+    sigma1_plot = ax.scatter(OmegaM_selected_1sigma, OmegaLambda_selected_1sigma, c=chi2[chi2_1sigma], cmap='RdYlBu_r', label=r'$1\sigma$', s=10, alpha=0.9, rasterized=True)
     ax.plot((0,1), (1,0), 'k', ls='--', label='Flat Universe')
 
     cbar_ax = fig.add_axes([0.53, 0.25, 0.4, 0.03]) 
@@ -423,6 +423,7 @@ print(OmegaM[acc_index])
 
 # Control unit for plotting 
 # plot_demonstrate_code()
+
 # plot_conformal_Hubble()
 # plot_conformal_time()
 # plot_time()
