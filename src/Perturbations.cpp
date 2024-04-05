@@ -421,10 +421,7 @@ void Perturbations::compute_source_functions(){
   }
 
   // Spline the source functions
-  ST_spline.create (x_array, k_array, ST_array, "Source_Temp_x_k");
-  if(Constants.polarization){
-    SE_spline.create (x_array, k_array, SE_array, "Source_Pol_x_k");
-  }
+  ST_spline.create(x_array, k_array, ST_array, "Source_Temp_x_k");
 
   Utils::EndTiming("source");
 }
@@ -730,7 +727,6 @@ void Perturbations::output(const double k, const std::string filename) const{
     fp << get_Theta(x,k,2)   << " ";
     fp << get_Phi(x,k)       << " ";
     fp << get_Psi(x,k)       << " ";
-    fp << get_Pi(x,k)        << " ";
     fp << get_Source_T(x,k)  << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(5,   arg)           << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(50,  arg)           << " ";

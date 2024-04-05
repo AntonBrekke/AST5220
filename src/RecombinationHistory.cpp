@@ -219,7 +219,7 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
   // Set up x-arrays to integrate over. We split into three regions as we need extra points in reionisation
   const int npts = 1e3;
   // Want to integrate backwards in time. ODESolver need increasing values, hence minus signs. 
-  Vector x_array_rev = Utils::linspace(0, -x_start, npts);
+  Vector x_array_rev = Utils::linspace(-x_end, -x_start, npts);
 
   // The ODE system dtau/dx, dtau_noreion/dx and dtau_baryon/dx
   ODESolver tau_ode;
