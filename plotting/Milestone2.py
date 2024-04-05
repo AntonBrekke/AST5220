@@ -32,7 +32,7 @@ def find_index(data, x=None, value=0, x_start=None, x_end=None):
     if x is None:
         index = np.where(np.min(abs(data - value)) == abs(data - value))[0][0]
         return index
-    else: # Specify what data is function of - used if data = value at multiple values places 
+    else: # Specify what data is function of - used if data = value at multiple x-values
         if x_start is None: x_start = np.min(x)
         if x_end is None: x_end = np.max(x)
         domain = (x >= x_start) * (x <= x_end)
@@ -80,6 +80,7 @@ def plot_optical_depth():
     ax.plot(x, tau_of_x, label=r'$\tau(x)$', lw=2)
     ax.plot(x, -dtaudx_of_x, label=r'$-\tau^\prime(x)$', lw=2)
     ax.plot(x, ddtauddx_of_x, label=r'$\tau^{\prime\prime}(x)$', lw=2)
+    ax.axvline(x_last_scatter, color='k', label='Last scattering', ls='--')
 
     # Formatting
     ax.set_xlim(-10, -4)
@@ -107,9 +108,9 @@ def plot_visibility_function():
     ddgddx_tilde_max = np.max(abs(ddgddx_tilde_of_x))
 
     # Plotting 
-    ax.plot(x, g_tilde_of_x / g_tilde_max, label=r'$\tilde g(x) / |\tilde g|_{\text{max}}$', lw=2)
-    ax.plot(x, dgdx_tilde_of_x / dgdx_tilde_max, label=r'$\tilde g^\prime(x) / |\tilde g^\prime|_{\text{max}}$', lw=2)
-    ax.plot(x, ddgddx_tilde_of_x / ddgddx_tilde_max, label=r'$\tilde g^{\prime\prime}(x) / |\tilde g^{\prime\prime}|_{\text{max}}$', lw=2)
+    ax.plot(x, g_tilde_of_x, label=r'$\tilde g(x)$', lw=2)
+    ax.plot(x, dgdx_tilde_of_x * g_tilde_max / dgdx_tilde_max, label=r'$\tilde g^\prime(x) \cdot |\tilde g|_{\text{max}} / |\tilde g^\prime|_{\text{max}}$', lw=2)
+    ax.plot(x, ddgddx_tilde_of_x * g_tilde_max / ddgddx_tilde_max, label=r'$\tilde g^{\prime\prime}(x) \cdot |\tilde g|_{\text{max}} / |\tilde g^{\prime\prime}|_{\text{max}}$', lw=2)
     ax.axvline(x_last_scatter, color='k', label='Last scattering', ls='--')
 
     # Formatting 
@@ -147,8 +148,8 @@ def find_values(latex=False):
     # Definition of freeze-out
     freeze_out_index = find_index(x, value=0)
     Xe_freeze_out = Xe_of_x[freeze_out_index]
+    print(tau_of_x[last_scatter_index])
     # print(x[freeze_out_index])      # Check
-
 
     # Make tables
     p = 5

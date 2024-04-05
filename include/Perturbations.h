@@ -33,13 +33,13 @@ class Perturbations{
     // but you only need to make the splines you will need
 
     // Splines of scalar perturbations quantities
+    Spline2D Phi_spline{"Phi_spline"};
+    Spline2D Psi_spline{"Psi_spline"};
     Spline2D delta_cdm_spline{"delta_cdm_spline"};
     Spline2D delta_b_spline{"delta_b_spline"};
     Spline2D v_cdm_spline{"v_cdm_spline"};
     Spline2D v_b_spline{"v_b_spline"};
-    Spline2D Phi_spline{"Phi_spline"};
     Spline2D Pi_spline{"Pi_spline"};
-    Spline2D Psi_spline{"Psi_spline"};
    
     // Splines of source functions (ST for temperature; SE for polarization)
     Spline2D ST_spline{"ST_spline"};
@@ -64,8 +64,8 @@ class Perturbations{
     // Right hand side of the ODE in the tight coupling regime
     int rhs_tight_coupling_ode(double x, double k, const double *y, double *dydx);
     
-    // Compute the time when tight coupling ends
-    double get_tight_coupling_time(const double k) const;
+    // Compute the index when tight coupling ends
+    double get_tight_coupling_index(const double k, Vector x_array) const;
     
     //==========================================================
     // [2] The full ODE system 
@@ -116,10 +116,14 @@ class Perturbations{
     double get_delta_b(const double x, const double k) const;
     double get_v_cdm(const double x, const double k) const;
     double get_v_b(const double x, const double k) const;
+    double get_dv_b(const double x, const double k) const;
     double get_Phi(const double x, const double k) const;
+    double get_dPhi(const double x, const double k) const;
     double get_Psi(const double x, const double k) const;
+    double get_dPsi(const double x, const double k) const;
     double get_Pi(const double x, const double k) const;
     double get_Theta(const double x, const double k, const int ell) const;
+    double get_dTheta(const double x, const double k, const int ell) const;
     double get_Theta_p(const double x, const double k, const int ell) const;
     double get_Nu(const double x, const double k, const int ell) const;
     double get_Source_T(const double x, const double k) const;

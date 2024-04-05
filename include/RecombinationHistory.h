@@ -33,6 +33,7 @@ class RecombinationHistory{
     double toMpc = 3.24077929e-23;    // Conversion from [m] to [Mpc]
     // Constants from cosmology class
     double OmegaB; 
+    double OmegaR; 
     double TCMB;
     double H0;
     double rho_c0;   // Critical density today

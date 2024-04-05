@@ -48,8 +48,8 @@ int main(int argc, char **argv){
   // Make sure you read the comments on the top of src/SupernovaFitting.h
   // mcmc_fit_to_supernova_data("data/supernovadata.txt", "results_supernovafitting.txt");
 
+  // Output background evolution quantities
   if (output){
-    // Output background evolution quantities
     Utils::StartTiming("Output");
     cosmo.output("data/cosmology.txt");
 
@@ -88,8 +88,6 @@ int main(int argc, char **argv){
     rec.output("data/recombination.txt");
     Utils::EndTiming("Output");
   }
-  // Remove when module is completed
-  return 0;
 
   //=========================================================================
   // Module III
@@ -97,13 +95,18 @@ int main(int argc, char **argv){
  
   // Solve the perturbations
   Perturbations pert(&cosmo, &rec);
+  Utils::StartTiming("Solve");
   pert.solve();
   pert.info();
+  Utils::EndTiming("Solve");
   
   // Output perturbation quantities
-  double kvalue = 0.01 / Constants.Mpc;
-  pert.output(kvalue, "perturbations_k0.01.txt");
-  
+  if (output){
+    Utils::StartTiming("Output");
+    double kvalue = 0.01 / Constants.Mpc;
+    pert.output(kvalue, "data/perturbations_k0.01.txt");
+    Utils::EndTiming("Output");
+  }
   // Remove when module is completed
   return 0;
   

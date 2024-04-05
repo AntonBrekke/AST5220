@@ -34,6 +34,7 @@ void RecombinationHistory::solve(){
 
   // Set cosmological constants
   OmegaB = cosmo -> get_OmegaB();
+  OmegaR = cosmo -> get_OmegaR();
   TCMB = cosmo -> get_TCMB();
   H0 = cosmo -> get_H0();   // Returns constant H0 
   rho_c0 = 3.*pow(H0, 2.) / (8.*M_PI*G);   // Value for critical density today
@@ -119,12 +120,11 @@ void RecombinationHistory::solve_number_density_electrons(){
   }
 
   // The Peebles ODE equation
-  ODESolver peebles_Xe_ode;
-  
   ODEFunction dXedx = [&](double x, const double *Xe, double *dXedx){
     return rhs_peebles_ode(x, Xe, dXedx);
   };
     
+  ODESolver peebles_Xe_ode;
   // Setting initial conditions 
   double Xe_init_val = Xe_arr[i_last_saha];
   Vector Xe_init_vec{Xe_init_val};
@@ -302,7 +302,7 @@ void RecombinationHistory::solve_for_sound_horizon(){
     return GSL_SUCCESS;
   };
 
-  double init_val = cs_of_x(x_array[0])/cosmo -> Hp_of_x(x_array[0]);
+  double init_val = cs_of_x(x_array[0]) / cosmo -> Hp_of_x(x_array[0]);
   Vector s_init_vec{init_val};
   sound_horizon_ode.solve(dsdx, x_array, s_init_vec);
   auto s_vec = sound_horizon_ode.get_data_by_component(0);
@@ -361,12 +361,12 @@ double RecombinationHistory::nH_of_x(double x) const{
 }
 
 double RecombinationHistory::R_of_x(double x) const{
-  return (3. * cosmo -> get_OmegaB(x))/(4.*cosmo -> get_OmegaR(x));
+  return 4.*OmegaR / (3.*OmegaB)*exp(-x);
 }
 
 double RecombinationHistory::cs_of_x(double x) const{
   double R = R_of_x(x);
-  return c*sqrt(1. / (3.*(1. + R)));
+  return c*sqrt(R / (3.*(1. + R)));
 }
 
 double RecombinationHistory::s_of_x(double x) const{

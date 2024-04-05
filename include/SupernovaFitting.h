@@ -94,12 +94,12 @@ void mcmc_fit_to_supernova_data(std::string supernovadata_filename, std::string 
   
   // The chi^2 function
   auto comp_chi2 = [&](std::array<double, nparam> & parameters){
-    // Priors: if outside range return huuuuge chi^2
     bool inside_prior = true;
     for(int i = 0; i < nparam; i++){
       if(parameters[i] > prior_high[i]) inside_prior = false;
       if(parameters[i] < prior_low[i]) inside_prior = false;
     }
+    // Priors: if outside range return huuuuge chi^2
     if(not inside_prior) return std::numeric_limits<double>::max();
 
     //=========================================================================================
@@ -119,7 +119,7 @@ void mcmc_fit_to_supernova_data(std::string supernovadata_filename, std::string 
     // Compute chi^2
     double chi2 = 0.0;
     for (size_t i = 0; i < z_arr.size(); i++){
-      double x = -std::log(1.0+z_arr[i]);
+      double x = -std::log(1.0 + z_arr[i]);
       //======= Here we call your distance function ======
       double L = cosmo.get_luminosity_distance_of_x(x) / Gpc; // Luminosity function in units of Gpc
       //==================================================

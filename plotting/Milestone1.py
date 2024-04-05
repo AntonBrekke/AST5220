@@ -61,7 +61,7 @@ class make_plot:
             self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready 
 
-    def hist(self, data, bins, label='', loc='best', density=False):
+    def hist(self, data, bins, label='', loc='best', density=False, bar_x_pos=0.64, bar_y_pos=0.8):
         self.counts, bins = np.histogram(data, bins=bins)
         self.n, self.bins, self.patches = self.ax.hist(bins[:-1], bins, weights=self.counts, density=density)
         cm = plt.get_cmap('Spectral_r')
@@ -74,9 +74,9 @@ class make_plot:
         # creating ScalarMappable 
         sm = plt.cm.ScalarMappable(cmap=cm, norm=norm) 
         sm.set_array([])
-        cbar_ax = self.fig.add_axes([0.64, 0.8, 0.3, 0.03]) 
+        cbar_ax = self.fig.add_axes([bar_x_pos, bar_y_pos, 0.3, 0.03]) 
         cbar = plt.colorbar(sm, cax=cbar_ax, ticks=np.linspace(np.min(self.counts), np.max(self.counts), 6), format=lambda x, pos: f'{x:.0f}', cmap='Spectral_r', orientation='horizontal') 
-        cbar.ax.tick_params(labelsize=12)
+        self.ax.tick_params(axis='both', which='major', labelsize=14)
         if label != '':
             self.ax.legend(prop={'size': 14}, loc=loc, frameon=False)
         # Call show when ready
@@ -143,15 +143,17 @@ def plot_demonstrate_code():
     domain_M_dom = np.logical_and(x > x_M_dom, x < x_Lambda_dom) 
     domain_DE_dom = np.where(x > x_Lambda_dom) 
 
-    label_dHpdx = r'$\frac{1}{\mathcal{H}(x)}\frac{d\mathcal{H}(x)}{dx}\;$'
-    label_ddHpddx = r'$\frac{1}{\mathcal{H}(x)}\frac{d^2\mathcal{H}(x)}{dx^2}\;$'
+    label_dHpdx = r'$\mathcal{H}^\prime(x)/\mathcal{H}(x)\;$'
+    label_ddHpddx = r'$\mathcal{H}^{\prime\prime}(x)/\mathcal{H}(x)\;$'
     title = r'Evolution of derivatives of $\mathcal{H}(x)\equiv aH(x)$'
     plot_Hp_derivatives = make_plot(title=title)
+
     # Hp'
     plot_Hp_derivatives.plot(x, dHpdx_of_x/Hp_of_x, label=label_dHpdx, lw=2)
     plot_Hp_derivatives.plot(x[domain_Rel_dom], -np.ones(len(x[domain_Rel_dom])), color='tab:red', lw=2)
     plot_Hp_derivatives.plot(x[domain_M_dom], -1/2*np.ones(len(x[domain_M_dom])), color='tab:orange', lw=2)
     plot_Hp_derivatives.plot(x[domain_DE_dom], np.ones(len(x[domain_DE_dom])), color='mediumorchid', lw=2)
+
     # Hp''
     plot_Hp_derivatives.plot(x, ddHpddx_of_x/Hp_of_x, label=label_ddHpddx, lw=2)
     plot_Hp_derivatives.plot(x[domain_Rel_dom], np.ones(len(x[domain_Rel_dom])), color='tab:red', label='Rad. dom. approx.', lw=2)
@@ -160,7 +162,6 @@ def plot_demonstrate_code():
     plot_Hp_derivatives.ax.axvline(0, color='k', ls='--')
 
     plot_Hp_derivatives.format_plot('x=ln(a)', grid=True)
-    plot_Hp_derivatives.fig.tight_layout()
     plt.savefig(savefig_path + r'/Hp_derivatives.pdf')
     plt.show()
 
@@ -182,9 +183,7 @@ def plot_demonstrate_code():
     plot_etaHp_pr_c.plot(x_DE_relevant, etaHp_DE_pr_c(x_DE_relevant), color='tab:green', label='DE dom. approx.', ls='--', lw=2, marker='P')
     plot_etaHp_pr_c.ax.axvline(x_acc, color='k', ls='--')
     plot_etaHp_pr_c.ax.axhline((eta_of_x*Hp_of_x/c)[acc_index], color='k', ls='--')
-
     plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log', grid=True)
-    plot_etaHp_pr_c.fig.tight_layout()
     plt.savefig(savefig_path + r'/etaHp_pr_c.pdf')
     plt.show()
 
@@ -307,8 +306,8 @@ def plot_supernovadata_MCMC_fits():
 def plot_posterior_PDF_Hubble_param():
     # H0 = h / Constants.H0_over_h, see BackgroundCosmology.cpp. PDF will be same.
     H0 = h * H0_over_h
-    posterior_H0_pdf = make_plot(title=r'Posterior PDF for $H_0$')
-    posterior_H0_pdf.hist(H0, bins=75, density=True)
+    posterior_H0_pdf = make_plot(title=r'Posterior PDF for $H_0$', x_start=66)
+    posterior_H0_pdf.hist(H0, bins=75, density=True, bar_x_pos=0.135, bar_y_pos=0.7)
     bins = posterior_H0_pdf.bins
     n = posterior_H0_pdf.n
     # print(np.sum(np.diff(posterior_H0_pdf.bins) * posterior_H0_pdf.n))   # Testing if prop. dist sum to 1 
@@ -319,9 +318,11 @@ def plot_posterior_PDF_Hubble_param():
     posterior_H0_pdf.plot(bins, gaussian, color='k', lw=2.5)
     posterior_H0_pdf.ax.axvline(H0_best_fit, color='k', ls='--', lw=2, label=r'Best fit value of $H_0$')
     posterior_H0_pdf.ax.axvline(mu, color='k', ls='-', lw=2)
+    posterior_H0_pdf.ax.axvline(67, color='k', ls='-.', lw=2, label=r'Fiducial value of $H_0$')        # H0 used in BackgroundCosmology.cpp
     posterior_H0_pdf.ax.legend(prop={'size':14}, frameon=False)
     # print(mu, H0_best_fit)
 
+    posterior_H0_pdf.ax.legend(prop={'size': 14}, loc='center left', frameon=False, bbox_to_anchor=(0.03, 0.85))
     posterior_H0_pdf.format_plot(xlabel=r'$H_0$', tight=True)
     plt.savefig(savefig_path + r'/posterior_PDF_Hubble_param.pdf')
     plt.show()
@@ -423,13 +424,12 @@ print(OmegaM[acc_index])
 
 # Control unit for plotting 
 # plot_demonstrate_code()
-
 # plot_conformal_Hubble()
 # plot_conformal_time()
 # plot_time()
 # plot_densities()
 # plot_luminosity_distance_of_z()
-# plot_supernovadata_MCMC_fits()
+plot_supernovadata_MCMC_fits()
 # plot_posterior_PDF_Hubble_param()
 # plot_posterior_PDF_OmegaLambda()
 
