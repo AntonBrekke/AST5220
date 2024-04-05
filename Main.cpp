@@ -103,8 +103,8 @@ int main(int argc, char **argv){
   // Output perturbation quantities
   if (output){
     Utils::StartTiming("Output");
-    double kvalue = 0.01 / Constants.Mpc;
-    pert.output(kvalue, "data/perturbations_k0.01.txt");
+    double kvalue = 0.1 / Constants.Mpc;
+    pert.output(kvalue, "data/perturbations_k0.1.txt");
     Utils::EndTiming("Output");
   }
   // Remove when module is completed

@@ -15,10 +15,10 @@ colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
 plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
 
 # Get data
-perturbations_k001_data = np.loadtxt(fr'{path}' + r'/perturbations_k0.01.txt')
+perturbations_k001_data = np.loadtxt(fr'{path}' + r'/perturbations_k0.1.txt')
 
 # Assign data
-x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, Source_T5, Source_T50, Source_T500= perturbations_k001_data.T
+x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, v_cdm, v_b = perturbations_k001_data.T
 
-plt.plot(x, Theta0)
+plt.plot(x, Phi)
 plt.show()
