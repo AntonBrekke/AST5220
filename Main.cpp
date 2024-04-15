@@ -93,8 +93,20 @@ int main(int argc, char **argv){
   // Module III
   //=========================================================================
  
-  // Solve the perturbations
-  Perturbations pert(&cosmo, &rec);
+  // Solve the perturbations.
+  // Set Neff = 0 since we have no neutrinos
+  Neff = 0;
+  Yp = 0;
+  // h = 0.7;
+  // OmegaB = 0.05;
+  // OmegaCDM = 0.45;
+  BackgroundCosmology cosmo_no_neutrino(h, OmegaB, OmegaCDM, OmegaK, Neff, TCMB);
+  cosmo_no_neutrino.solve();
+
+  RecombinationHistory rec_no_neutrino(&cosmo_no_neutrino, Yp);
+  rec_no_neutrino.solve();
+
+  Perturbations pert(&cosmo_no_neutrino, &rec_no_neutrino);
   Utils::StartTiming("Solve");
   pert.solve();
   pert.info();
@@ -103,8 +115,14 @@ int main(int argc, char **argv){
   // Output perturbation quantities
   if (output){
     Utils::StartTiming("Output");
-    double kvalue = 0.1 / Constants.Mpc;
-    pert.output(kvalue, "data/perturbations_k0.1.txt");
+    double kvalue1 = 0.001 / Constants.Mpc;
+    pert.output(kvalue1, "data/perturbations_k0.001.txt");
+
+    double kvalue2 = 0.01 / Constants.Mpc;
+    pert.output(kvalue2, "data/perturbations_k0.01.txt");
+    
+    double kvalue3 = 0.1 / Constants.Mpc;
+    pert.output(kvalue3, "data/perturbations_k0.1.txt");
     Utils::EndTiming("Output");
   }
   // Remove when module is completed
