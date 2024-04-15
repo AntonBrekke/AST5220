@@ -155,7 +155,6 @@ void Perturbations::integrate_perturbations(){
       double c = Constants.c;
       double H0 = cosmo -> get_H0();
       double Hp = cosmo -> Hp_of_x(x);
-      double ckHp = c*k/Hp;
       double OmegaR = cosmo -> get_OmegaR();      // OmegaR0
       double dtau = rec -> dtaudx_of_x(x);
 
@@ -174,7 +173,7 @@ void Perturbations::integrate_perturbations(){
       delta_b_array[index] = delta_b;
       v_cdm_array[index] = v_cdm;
       v_b_array[index] = v_b;
-      // Solve for all of the l-values
+      // Fill in all solved Theta-values
       for(int l=0; l < Constants.n_ell_theta; l++){
         Theta_array[l][index] = Theta[l];
       }
@@ -316,9 +315,9 @@ Vector Perturbations::set_ic_after_tight_coupling(
   // SET: Photon temperature perturbations (Theta_ell)
   Theta[0] = Theta_tc[0];
   Theta[1] = Theta_tc[1];
-  Theta[2] = -20.*ckHp/(45.*dtau) * Theta_tc[1];
+  Theta[2] = Theta_tc[2];
   for(int l=3; l < n_ell_theta; l++){
-    Theta[l] = -l/(2.*l+1.)*ckHp/dtau * Theta[l-1];
+    Theta[l] = -l/(2.*l+1.)*ckHp/dtau * Theta_tc[l-1];
   }
 
   // No polarizations or neutrinos
@@ -443,7 +442,7 @@ int Perturbations::rhs_tight_coupling_ode(double x, double k, const double *y, d
   const int n_ell_neutrinos_tc  = Constants.n_ell_neutrinos_tc;
   const bool neutrinos          = Constants.neutrinos;
 
-  // The different quantities in the y array
+  // References to the quantities we are going to set in the y array
   const double &delta_cdm       =  y[Constants.ind_deltacdm_tc];
   const double &delta_b         =  y[Constants.ind_deltab_tc];
   const double &v_cdm           =  y[Constants.ind_vcdm_tc];
@@ -555,7 +554,7 @@ int Perturbations::rhs_full_ode(double x, double k, const double *y, double *dyd
   double ddtau = rec -> ddtauddx_of_x(x);
 
   double ckHp   = Constants.c*k/Hp;
-  double Psi    = -Phi - 12.*pow(Hp/(Constants.c*k), 2) * OmegaR*Theta[2];
+  double Psi    = -Phi - 12.*pow(H0/(Constants.c*k*exp(x)), 2) * OmegaR*Theta[2];
 
   //=============================================================================
   // Fill in the expressions for all the derivatives
@@ -566,7 +565,7 @@ int Perturbations::rhs_full_ode(double x, double k, const double *y, double *dyd
   ddelta_cdmdx = ckHp*v_cdm - 3.*dPhidx;
   ddelta_bdx   = ckHp*v_b - 3.*dPhidx;
   dv_cdmdx     = -v_cdm - ckHp*Psi;
-  dv_bdx       = -v_b - ckHp*Psi + dtau*R*(3*Theta[1] + v_b);
+  dv_bdx       = -v_b - ckHp*Psi + dtau*R*(3.*Theta[1] + v_b);
 
   // SET: Photon multipoles (Theta_ell)
   dThetadx[0] = -ckHp*Theta[1] - dPhidx;
@@ -718,7 +717,8 @@ void Perturbations::info() const{
 void Perturbations::output(const double k, const std::string filename) const{
   std::ofstream fp(filename.c_str());
   const int npts = 5000;
-  auto x_array = Utils::linspace(x_start, x_end, npts);
+  // Only run x_array to 0.0 so you don't violate the domain of the Bessel-functions 
+  auto x_array = Utils::linspace(x_start, 0.0, npts);
   auto print_data = [&] (const double x) {
     double arg = k * (cosmo -> eta_of_x(0.0) - cosmo -> eta_of_x(x));
     fp << x                  << " ";
@@ -728,11 +728,13 @@ void Perturbations::output(const double k, const std::string filename) const{
     fp << get_Phi(x,k)       << " ";
     fp << get_Psi(x,k)       << " ";
     fp << get_Source_T(x,k)  << " ";
+    fp << get_delta_cdm(x,k)     << " ";
+    fp << get_delta_b(x,k)     << " ";
     fp << get_v_cdm(x,k)     << " ";
     fp << get_v_b(x,k)       << " ";
-    // fp << get_Source_T(x,k) * Utils::j_ell(5,   arg)           << " ";
-    // fp << get_Source_T(x,k) * Utils::j_ell(50,  arg)           << " ";
-    // fp << get_Source_T(x,k) * Utils::j_ell(500, arg)           << " ";
+    fp << get_Source_T(x,k) * Utils::j_ell(5,   arg)           << " ";
+    fp << get_Source_T(x,k) * Utils::j_ell(50,  arg)           << " ";
+    fp << get_Source_T(x,k) * Utils::j_ell(500, arg)           << " ";
     fp << "\n";
   };
   std::for_each(x_array.begin(), x_array.end(), print_data);

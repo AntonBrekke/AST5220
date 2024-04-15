@@ -14,34 +14,60 @@ colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
 colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
 plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
 
-# Get data
-perturbations_k01_data = np.loadtxt(fr'{path}' + r'/perturbations_k0.1.txt')
-perturbations_k001_data = np.loadtxt(fr'{path}' + r'/perturbations_k0.01.txt')
-perturbations_k0001_data = np.loadtxt(fr'{path}' + r'/perturbations_k0.001.txt')
+def plot_data(datatype='Theta0', factor=1, title='', ylabel='', xscale='linear', yscale='linear', show=True):
+    k_list = [0.1, 0.01, 0.001]
 
-# Assign data
-x_k01, Theta0_k01, Theta1_k01, Theta2_k01, Phi_k01, Psi_k01, Source_T_k01, v_cdm_k01, v_b_k01 = perturbations_k01_data.T
-x_k001, Theta0_k001, Theta1_k001, Theta2_k001, Phi_k001, Psi_k001, Source_T_k001, v_cdm_k001, v_b_k001 = perturbations_k001_data.T
-x_k0001, Theta0_k0001, Theta1_k0001, Theta2_k0001, Phi_k0001, Psi_k0001, Source_T_k0001, v_cdm_k0001, v_b_k0001 = perturbations_k0001_data.T
+    fig = plt.figure()
+    ax = fig.add_subplot()
 
-plot_index = np.where(x_k01 <= 0)
-plot_start = -15
-plot_end = x_k01[plot_index][-1] + 0.005
+    ax.set_title(title, fontsize=16)
 
-plt.plot(x_k01, Phi_k01)
-plt.plot(x_k001, Phi_k001)
-plt.plot(x_k0001, Phi_k0001)
-plt.xlim(plot_start, plot_end)
-plt.show()
+    for ki in k_list:
+        # Get data
+        perturbations_data = np.loadtxt(fr'{path}' + f'/perturbations_k{ki}.txt')
+        x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, delta_cdm, delta_b, v_cdm, v_b, T5, T50, T500 = perturbations_data.T
+        data_dict = {'x': x, 'Theta0': Theta0, 'Theta1': Theta1, 'Theta2': Theta2,
+                    'Phi': Phi, 'Psi': Psi, 'Source_T': Source_T, 'delta_cdm': delta_cdm,
+                    'delta_b': delta_b, 'v_cdm': v_cdm, 'v_b': v_b, 'T5': T5, 
+                    'T50': T50, 'T500': T500, 'Phi + Psi': Phi + Psi}
 
-plt.plot(x_k01, Phi_k01 + Psi_k01)
-plt.plot(x_k001, Phi_k001 + Psi_k001)
-plt.plot(x_k0001, Phi_k0001 + Psi_k0001)
-plt.xlim(plot_start, plot_end)
-plt.show()
+        ax.plot(x, factor*data_dict[datatype], label=f'k={ki}', lw=2)
 
-plt.plot(x_k01, Theta0_k01 + Psi_k01)
-plt.plot(x_k001, Theta0_k001 + Psi_k001)
-plt.plot(x_k0001, Theta0_k0001 + Psi_k0001)
-plt.xlim(plot_start, plot_end)
-plt.show()
+    ax.set_xlim(-15, 0)
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.set_xlabel('x=ln(a)', fontsize=16)
+    ax.set_ylabel(ylabel, fontsize=16)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
+    ax.grid(True)
+
+    ax.legend(prop={'size': 14}, loc='best', frameon=False)
+    fig.tight_layout()
+    plt.savefig(savefig_path + rf'/{datatype}.pdf')
+    if show is True: plt.show()
+
+def plot_density_perturbations(show=True):
+    # Plot density perturbations
+    plot_data('Theta0', factor=4, title=r'Density perturbation $\delta_{\gamma}=4\Theta_0$', show=show)
+    plot_data('delta_cdm', title=r'Density perturbation $\delta_{\rm CDM}$', yscale='log', show=show)
+    plot_data('delta_b', title=r'Density perturbation $\delta_{\rm b}$', yscale='log', show=show)
+
+def plot_velocity_perturbations(show=True):
+    # Plot velocity perturbations
+    plot_data('Theta1', factor=-3, title=r'Velocity perturbation $v_{\gamma}=-3\Theta_1$', show=show)
+    plot_data('v_cdm', title=r'Velocity perturbation $v_{\rm CDM}$', yscale='log', show=show)
+    plot_data('v_b', title=r'Velocity perturbation $v_{\rm b}$', yscale='log', show=show)
+
+def plot_photon_quadropole(show=True):
+    # Plot photon quadropole
+    plot_data('Theta2', title=r'Photon quadropole $\Theta_2$', show=show)
+
+def plot_potentials(show=True):
+    # Plot potentials 
+    plot_data('Phi', title=r'Potential $\Phi$', show=show)
+    plot_data('Phi + Psi', title=r'Sum: $\Phi + \Psi$', show=show)
+
+plot_density_perturbations(show=False)
+plot_velocity_perturbations(show=False)
+plot_photon_quadropole(show=False)
+plot_potentials(show=False)
