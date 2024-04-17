@@ -689,7 +689,7 @@ void Perturbations::info() const{
 
 void Perturbations::output(const double k, const std::string filename) const{
   std::ofstream fp(filename.c_str());
-  const int npts = 10000;
+  const int npts = 5000;
   // Only run x_array to 0.0 so you don't violate the domain of the Bessel-functions 
   auto x_array = Utils::linspace(x_start, 0.0, npts);
   auto print_data = [&] (const double x) {
