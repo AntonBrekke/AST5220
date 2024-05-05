@@ -98,9 +98,9 @@ int main(int argc, char **argv){
   // Set Neff = 0 since we have no neutrinos, Yp = 0 since no Helium.
   Neff = 0;
   Yp = 0;
-  h           = 0.7;
-  OmegaB      = 0.05;
-  OmegaCDM    = 0.45;
+  // h        = 0.7;
+  // OmegaB   = 0.05;
+  // OmegaCDM = 0.45;
   BackgroundCosmology cosmo_no_neutrino(h, OmegaB, OmegaCDM, OmegaK, Neff, TCMB);
   cosmo_no_neutrino.solve();
 

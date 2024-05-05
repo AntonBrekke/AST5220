@@ -55,8 +55,8 @@ void Perturbations::integrate_perturbations(){
   for(int ik = 0; ik < n_k; ik++){
 
     // Progress bar...
-    if( (10*ik)/n_k != (10*ik + 10)/n_k ) {
-      std::cout << (100*ik + 100)/n_k << "% " << std::flush;
+    if( (ik*10) / n_k != ((ik + 1)*10) / n_k ) {
+      std::cout << ((ik + 1)*100) / n_k << "% " << std::flush;
       if(ik == n_k - 1) std::cout << std::endl;
     }
 
