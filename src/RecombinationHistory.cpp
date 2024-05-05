@@ -218,14 +218,14 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
 
   // Set up x-arrays to integrate over. We split into three regions as we need extra points in reionisation
   const int npts = 1e3;
-  // Want to integrate backwards in time. ODESolver need increasing values, hence minus signs. 
-  Vector x_array_rev = Utils::linspace(-x_end, -x_start, npts);
+  // Want to integrate backwards in time. int_x0^x1 f(x)dx = int_x1^x0 -f(x)dx
+  Vector x_array_rev = Utils::linspace(x_end, x_start, npts);
 
   // The ODE system dtau/dx, dtau_noreion/dx and dtau_baryon/dx
   ODESolver tau_ode;
   ODEFunction dtaudx = [&](double x, const double *tau, double *dtaudx){
     // Set the derivative for photon optical depth
-    dtaudx[0] = c*sigma_T*ne_of_x(-x) / (cosmo -> H_of_x(-x));
+    dtaudx[0] = -c*sigma_T*ne_of_x(x) / (cosmo -> H_of_x(x));
     return GSL_SUCCESS;
   };
 
@@ -243,7 +243,7 @@ void RecombinationHistory::solve_for_optical_depth_tau(){
   Vector x_array(npts);
   Vector tau_vec(npts);
   for (int i=0; i < npts; i++){
-    x_array[i] = -x_array_rev[npts-1 - i];
+    x_array[i] = x_array_rev[npts-1 - i];
     tau_vec[i] = tau_vec_rev[npts-1 - i];
   }
 
@@ -410,6 +410,7 @@ void RecombinationHistory::output(const std::string filename) const{
     fp << g_tilde_of_x(x)        << " ";
     fp << dgdx_tilde_of_x(x)     << " ";
     fp << ddgddx_tilde_of_x(x)   << " ";
+    fp << cosmo -> get_TCMB(x)   << " ";
     fp << s_of_x(x)              << " ";
     fp << "\n";
   };

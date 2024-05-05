@@ -28,10 +28,22 @@ class PowerSpectrum {
     double kpivot_mpc = 0.05;
 
     // The k-values we compute Theta_ell(k) etc. for
-    const int n_k      = 100;
     const double k_min = Constants.k_min;
     const double k_max = Constants.k_max;
+    const int n_k      = 100;          // Number of k-values
+
+    // Extra stuff I need for my code. Given by Hans Winther slides Milestone 4
+    const double n_bessel   = 25.;     // Samples per oscillation for the Bessel function
+    const double n_x_los      = 400.;   // Samples per oscillation of the integrand in the line of sight integral
+    const double n_k_ps       = 32.;   // Sample per oscillation when integrating over k
     
+    const double x_start     = Constants.x_start;
+    const double x_start_los = -8.;     // Time before recombination from which we integrate the line of sight integral
+    const double x_end       = Constants.x_end;
+    const double x_end_los   = 0.0;
+
+    const double eta0 = cosmo -> eta_of_x(0.0);
+
     // The ells's we will compute Theta_ell and Cell for
     Vector ells{ 
         2,    3,    4,    5,    6,    7,    8,    10,   12,   15,   
@@ -42,6 +54,9 @@ class PowerSpectrum {
         1400, 1450, 1500, 1550, 1600, 1650, 1700, 1750, 1800, 1850, 
         1900, 1950, 2000};
    
+    Vector test_ell_index{
+        4, 19, 24, 32, 42
+    };
     //=====================================================================
     // [1] Create bessel function splines needed for the LOS integration
     //=====================================================================
@@ -57,6 +72,9 @@ class PowerSpectrum {
     // [2] Do the line of sight integration and spline the result
     //=====================================================================
     
+    double integrate_trapezoid(double delta_x, Vector y_arr);
+    Vector get_linspace(double x_start, double x_end, double delta);
+
     // Do LOS integration for all ells and all k's in the given k_array
     // and for all the source functions (temperature, polarization, ...)
     void line_of_sight_integration(Vector & k_array);
@@ -112,11 +130,14 @@ class PowerSpectrum {
 
     // Get the quantities we have computed
     double get_cell_TT(const double ell) const;
-    double get_cell_TE(const double ell) const;
-    double get_cell_EE(const double ell) const;
+    double get_bessel_func(const int il_index, const double z) const;
+    double get_thetaT_ell_of_k_spline(const int il_index, const double k) const;
 
     // Output Cells in units of l(l+1)/2pi (muK)^2
     void output(std::string filename) const;
+    void output_matter_PS(std::string filename) const;
+    void output_theta(std::string filename) const;
+    void output_bessel_function(std::string filename) const;
 };
 
 #endif

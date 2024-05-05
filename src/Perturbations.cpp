@@ -395,13 +395,13 @@ void Perturbations::compute_source_functions(){
       double c    = Constants.c;
       double ckHp = c*k/Hp;
 
-      double ddT2 = ckHp/5.*(2.*dT1 - 3.*dT3) - ckHp*dHp/(5.*Hp)*(2*T1 - 3*T3) + 9./10.*(ddtau*T2 + dtau*dT2);
+      double ddT2 = ckHp/5.*(2.*dT1 - 3.*dT3) - ckHp*dHp/(5.*Hp)*(2*T1 - 3*T3) + 9./10.*(ddtau*T2 + dtau*dT2); // Callin: 3./10.*ddtau*T2 + dtau*dT2)
       
       // Temperature source. Callin 2006. 
       double term_1 = g*(T0 + Psi + T2/4.) + exp(-tau)*(dPsi - dPhi);
-      double term_2 = -1./k*(dHp*g*v_b + Hp*dg*v_b + Hp*g*dv_b);
-      double term_3 = 3./(4.*pow(k, 2.)) * dHp*(dHp*g*T2 + Hp*dg*T2 + Hp*g*dT2);
-      double term_4 = 3./(4.*pow(k, 2.)) * Hp*(ddHp*g*T2 + Hp*ddg*T2 + Hp*g*ddT2 + 2*(dHp*dg*T2 + dHp*g*dT2 + Hp*dg*dT2));
+      double term_2 = -1./(c*k)*(dHp*g*v_b + Hp*dg*v_b + Hp*g*dv_b);
+      double term_3 = 3./(4.*pow(c*k, 2.)) * dHp*(dHp*g*T2 + Hp*dg*T2 + Hp*g*dT2);
+      double term_4 = 3./(4.*pow(c*k, 2.)) * Hp*(ddHp*g*T2 + Hp*ddg*T2 + Hp*g*ddT2 + 2*(dHp*dg*T2 + dHp*g*dT2 + Hp*dg*dT2));
       ST_array[index] = term_1 + term_2 + term_3 + term_4;
     }
   }
@@ -703,6 +703,7 @@ void Perturbations::output(const double k, const std::string filename) const{
     fp << get_delta_b(x,k)                           << " ";
     fp << get_v_cdm(x,k)                             << " ";
     fp << get_v_b(x,k)                               << " ";
+    fp << cosmo -> eta_of_x(x)                       << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(5,   arg) << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(50,  arg) << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(500, arg) << " ";

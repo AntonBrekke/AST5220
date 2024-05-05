@@ -161,6 +161,11 @@ double BackgroundCosmology::get_OmegaCDM(double x) const{
   else return OmegaCDM * pow(H0, 2) / (exp(3*x) * pow(H_of_x(x), 2));
 }
 
+double BackgroundCosmology::get_OmegaM(double x) const{ 
+  if (x == 0.0) return OmegaCDM + OmegaB;
+  else return get_OmegaCDM(x) + get_OmegaB(x);
+}
+
 double BackgroundCosmology::get_OmegaLambda(double x) const{ 
   if (x == 0.0) return OmegaLambda;
   else return OmegaLambda * pow(H0, 2) / (pow(H_of_x(x), 2));

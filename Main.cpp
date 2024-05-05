@@ -98,6 +98,9 @@ int main(int argc, char **argv){
   // Set Neff = 0 since we have no neutrinos, Yp = 0 since no Helium.
   Neff = 0;
   Yp = 0;
+  h           = 0.7;
+  OmegaB      = 0.05;
+  OmegaCDM    = 0.45;
   BackgroundCosmology cosmo_no_neutrino(h, OmegaB, OmegaCDM, OmegaK, Neff, TCMB);
   cosmo_no_neutrino.solve();
 
@@ -123,16 +126,17 @@ int main(int argc, char **argv){
     pert.output(kvalue3, "data/perturbations_k0.1.txt");
     Utils::EndTiming("Output");
   }
-  // Remove when module is completed
-  return 0;
   
   //=========================================================================
   // Module IV
   //=========================================================================
 
-  PowerSpectrum power(&cosmo, &rec, &pert, A_s, n_s, kpivot_mpc);
+  PowerSpectrum power(&cosmo_no_neutrino, &rec_no_neutrino, &pert, A_s, n_s, kpivot_mpc);
   power.solve();
-  power.output("cells.txt");
+  power.output("data/cells.txt");
+  power.output_matter_PS("data/Pk.txt");
+  power.output_theta("data/transfer_function.txt");
+  power.output_bessel_function("data/bessel_function.txt");
   
   // Remove when module is completed
   return 0;

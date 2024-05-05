@@ -19,7 +19,7 @@ recombination_data = np.loadtxt(fr'{path}' + r'/recombination.txt')
 
 # Assign data 
 x, t_of_x, z_of_x, Xe_of_x, XeSaha_of_x, ne_of_x, tau_of_x, dtaudx_of_x, \
-ddtauddx_of_x, g_tilde_of_x, dgdx_tilde_of_x, ddgddx_tilde_of_x, s_of_x = recombination_data.T
+ddtauddx_of_x, g_tilde_of_x, dgdx_tilde_of_x, ddgddx_tilde_of_x, T_of_x, s_of_x = recombination_data.T
 
 # Practical constants
 c = scc.c       # m/s
@@ -149,6 +149,8 @@ def find_values(latex=False):
     freeze_out_index = find_index(x, value=0)
     Xe_freeze_out = Xe_of_x[freeze_out_index]
     print(tau_of_x[last_scatter_index])
+    print(f'Photon temperature recombination: {T_of_x[recombination_index]}K')
+    print(f'Photon energy recombination: {scc.physical_constants["Boltzmann constant in eV/K"][0]*T_of_x[recombination_index]}eV')
     # print(x[freeze_out_index])      # Check
 
     # Make tables
