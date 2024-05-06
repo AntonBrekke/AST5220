@@ -65,17 +65,21 @@ def plot_CMB(show=True):
     C_ell_normal = C_ell/(ell*(ell+1))*(2*np.pi)/(1e6*2.7255)**2
 
     # Make my own CMAP for the CMB 
-    color_factor = 2.5
+    color_factor = 2
     get_cmap = plt.get_cmap('RdYlBu_r')
-    # print(get_cmap.N)     # 256
-    RdYlBu_r = get_cmap(np.linspace(0, 1, 256))**color_factor
-    CMB_cmap = mc.ListedColormap(RdYlBu_r)
+    colors = get_cmap(np.linspace(0, 1, 256))       # 256 not too important, just because print(get_cmap.N) -> 256
+    # RdYlBu_r gets too yellow when amplifying colors. Modify map
+    cmap = np.array([*colors[:30:15, :3],                           # Steal from RdYlBu_r
+                    [0, 0.8, 1], [1, 1, 0.9], [1, 0.7, 0],        # Light blue, Yellow, Orange
+                     *colors[256-30::15, :3]])**color_factor       # Steal from RdYlBu_r
+
+    CMB_cmap = mc.LinearSegmentedColormap.from_list('CMB_cmap', cmap, N=300)
 
     # Generate Gaussian random fields
     nside = int(2**10)       # Resolution of image    
     print("Approximate resolution at NSIDE {} is {:.2} deg".format(nside, hp.nside2resol(nside, arcmin=True) / 60))     # stole this from https://healpy.readthedocs.io/en/latest/tutorial.html
     lmax = int(np.max(ell))
-    seed = 101         # Set seed to get same plot each time.
+    seed = 15012001         # Set seed to get same plot each time.
     np.random.seed(seed)
     alm = hp.synalm(C_ell_normal, lmax=lmax)
 
