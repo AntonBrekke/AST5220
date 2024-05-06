@@ -395,7 +395,9 @@ void Perturbations::compute_source_functions(){
       double c    = Constants.c;
       double ckHp = c*k/Hp;
 
-      double ddT2 = ckHp/5.*(2.*dT1 - 3.*dT3) - ckHp*dHp/(5.*Hp)*(2*T1 - 3*T3) + 9./10.*(ddtau*T2 + dtau*dT2); // Callin: 3./10.*ddtau*T2 + dtau*dT2)
+      double ddT2 = ckHp/5.*(2.*dT1 - 3.*dT3) 
+                  - ckHp*dHp/(5.*Hp)*(2*T1 - 3*T3) 
+                  + 9./10.*(ddtau*T2 + dtau*dT2); // Callin: 3./10.*ddtau*T2 + dtau*dT2)
       
       // Temperature source. Callin 2006. 
       double term_1 = g*(T0 + Psi + T2/4.) + exp(-tau)*(dPsi - dPhi);

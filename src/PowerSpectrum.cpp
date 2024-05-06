@@ -263,8 +263,9 @@ double PowerSpectrum::get_thetaT_ell_of_k_spline(const int il_index, const doubl
 void PowerSpectrum::output(std::string filename) const{
   // Output in standard units of muK^2
   std::ofstream fp(filename.c_str());
+  const int ellmin = ells[0];
   const int ellmax = int(ells[ells.size()-1]);
-  auto ellvalues = Utils::linspace(2, ellmax, ellmax-1);
+  auto ellvalues = Utils::linspace(ellmin, ellmax, ellmax + 1 - ellmin);
   auto print_data = [&] (const double ell) {
     double normfactor  = (ell * (ell + 1)) / (2.0 * M_PI) * pow(1e6 * cosmo->get_TCMB(0.0), 2.);
     double normfactorL = (ell * (ell+1)) * (ell * (ell+1)) / (2.0 * M_PI);

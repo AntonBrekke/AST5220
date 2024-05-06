@@ -138,8 +138,5 @@ int main(int argc, char **argv){
   power.output_theta("data/transfer_function.txt");
   power.output_bessel_function("data/bessel_function.txt");
   
-  // Remove when module is completed
-  return 0;
-
   Utils::EndTiming("Everything");
 }

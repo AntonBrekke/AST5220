@@ -45,7 +45,7 @@ class PowerSpectrum {
     const double eta0 = cosmo -> eta_of_x(0.0);
 
     // The ells's we will compute Theta_ell and Cell for
-    Vector ells{ 
+    Vector ells{
         2,    3,    4,    5,    6,    7,    8,    10,   12,   15,   
         20,   25,   30,   40,   50,   60,   70,   80,   90,   100,  
         120,  140,  160,  180,  200,  225,  250,  275,  300,  350,  
