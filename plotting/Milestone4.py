@@ -28,37 +28,37 @@ z, bessel = bessel_func[:, 0], bessel_func[:, 1:]
 ell_TT_low, C_ell_TT_low, err_up_low, err_down_low = low_l_data.T 
 ell_TT_high, C_ell_TT_high, err_up_high, err_down_high, bestfit_high = high_l_data.T 
 
-def plot_bessel():
+def plot_bessel(show=True):
     plt.plot(z, bessel, lw=0.8)
     plt.xlim(0, 1000)
     plt.ylim(-0.02, 0.04)
-    plt.show()
+    if show is True: plt.show()
 
     plt.plot(keta0, Theta, lw=0.8)
     plt.xlim(0, 1500)
     plt.ylim(-0.005, 0.015)
-    plt.show()
+    if show is True: plt.show()
 
-def plot_integrand():
+def plot_integrand(show=True):
     plt.plot(keta0, 6*(6+1)*abs(Theta[:, 0])**2/k, lw=0.8)
     plt.plot(keta0, 100*(100+1)*abs(Theta[:, 1])**2/k, lw=0.8)
     plt.plot(keta0, 200*(200+1)*abs(Theta[:, 2])**2/k, lw=0.8)
     plt.plot(keta0, 500*(500+1)*abs(Theta[:, 3])**2/k, lw=0.8)
     plt.xlim(0, 1500)
-    plt.show()
+    if show is True: plt.show()
 
-def plot_power_spectrum():
+def plot_power_spectrum(show=True):
     plt.plot(ell, C_ell)
     plt.errorbar(ell_TT_low, C_ell_TT_low, yerr=[err_down_low, err_up_low], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2)
     plt.errorbar(ell_TT_high, C_ell_TT_high, yerr=[err_down_high, err_up_high], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2)
     plt.xscale('log')
     plt.yscale('log')
-    plt.show()
+    if show is True: plt.show()
 
     plt.plot(k, P_k)
     plt.xscale('log')
     plt.yscale('log')
-    plt.show()
+    if show is True: plt.show()
 
 def plot_CMB(show=True):
     # Normalize spectrum back
@@ -106,8 +106,8 @@ def plot_CMB(show=True):
     plt.savefig(savefig_path + r'/CMB.pdf')
     if show is True: plt.show()
 
-# plot_bessel()
-# plot_integrand()
-# plot_power_spectrum()
+# plot_bessel(show=False)
+# plot_integrand(show=False)
+# plot_power_spectrum(show=False)
 plot_CMB(show=True)
 
