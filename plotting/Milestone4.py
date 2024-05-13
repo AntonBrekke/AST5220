@@ -71,7 +71,7 @@ def plot_CMB(show=True):
     # RdYlBu_r gets too yellow when amplifying colors. Modify map
     cmap = np.array([*colors[:30:15, :3],                           # Steal from RdYlBu_r
                     [0, 0.8, 1], [1, 1, 0.9], [1, 0.7, 0],        # Light blue, Yellow, Orange
-                     *colors[256-30::15, :3]])**color_factor       # Steal from RdYlBu_r
+                     *(colors**1.5)[256-30::15, :3]])**color_factor       # Steal from RdYlBu_r
 
     CMB_cmap = mc.LinearSegmentedColormap.from_list('CMB_cmap', cmap, N=300)
 
@@ -108,6 +108,6 @@ def plot_CMB(show=True):
 
 # plot_bessel(show=False)
 # plot_integrand(show=False)
-# plot_power_spectrum(show=False)
+# plot_power_spectrum(show=True)
 plot_CMB(show=True)
 
