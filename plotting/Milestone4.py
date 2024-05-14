@@ -65,15 +65,16 @@ def plot_CMB(show=True):
     C_ell_normal = C_ell/(ell*(ell+1))*(2*np.pi)/(1e6*2.7255)**2
 
     # Make my own CMAP for the CMB 
-    color_factor = 2
+    color_factor = 1.5      # Scales amplitude of total colormap
     get_cmap = plt.get_cmap('RdYlBu_r')
     colors = get_cmap(np.linspace(0, 1, 256))       # 256 not too important, just because print(get_cmap.N) -> 256
     # RdYlBu_r gets too yellow when amplifying colors. Modify map
-    cmap = np.array([*colors[:30:15, :3],                           # Steal from RdYlBu_r
-                    [0, 0.8, 1], [1, 1, 0.9], [1, 0.7, 0],        # Light blue, Yellow, Orange
-                     *(colors**1.5)[256-30::15, :3]])**color_factor       # Steal from RdYlBu_r
+    cmap = np.array([[0, 0, 0.5], *colors[10:40:15, :3],                           # Steal from RdYlBu_r
+                    [0, 0.8, 1], [1, 1, 0.9], [1, 0.7, 0],         # Light blue, Yellow, Orange
+                     *(colors)[256-30::15, :3], [0,0,0]])**color_factor       # Steal from RdYlBu_r
 
     CMB_cmap = mc.LinearSegmentedColormap.from_list('CMB_cmap', cmap, N=300)
+    # CMB_cmap = 'hot'
 
     # Generate Gaussian random fields
     nside = int(2**10)       # Resolution of image    
