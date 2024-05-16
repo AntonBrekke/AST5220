@@ -182,9 +182,9 @@ void PowerSpectrum::line_of_sight_integration(Vector & k_array){
 // Cell = Int_0^inf 4 * pi * P(k) f_ell g_ell dk/k
 //====================================================
 Vector PowerSpectrum::solve_for_cell(
-    Vector & log_k_array,
-    std::vector<Spline> & f_ell_spline,
-    std::vector<Spline> & g_ell_spline){
+  Vector & log_k_array,
+  std::vector<Spline> & f_ell_spline,
+  std::vector<Spline> & g_ell_spline){
   const int nells      = ells.size();
 
   //============================================================================
@@ -268,7 +268,6 @@ void PowerSpectrum::output(std::string filename) const{
   auto ellvalues = Utils::linspace(ellmin, ellmax, ellmax + 1 - ellmin);
   auto print_data = [&] (const double ell) {
     double normfactor  = (ell * (ell + 1)) / (2.0 * M_PI) * pow(1e6 * cosmo->get_TCMB(0.0), 2.);
-    double normfactorL = (ell * (ell+1)) * (ell * (ell+1)) / (2.0 * M_PI);
     fp << ell                                 << " ";
     fp << cell_TT_spline(ell) * normfactor  << " ";
     fp << "\n";
@@ -318,7 +317,7 @@ void PowerSpectrum::output_theta(std::string filename) const{
 void PowerSpectrum::output_bessel_function(std::string filename) const{
   // Output bessel functions
   std::ofstream fp(filename.c_str());
-  Vector z_array = Utils::linspace(0.0,1000,5000);
+  Vector z_array = Utils::linspace(0.0, 1000, 5000);
   auto print_data = [&] (const double z) {
     fp << z << " ";
     fp << get_bessel_func(test_ell_index[0], z) << " ";

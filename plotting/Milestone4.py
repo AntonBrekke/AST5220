@@ -29,35 +29,72 @@ ell_TT_low, C_ell_TT_low, err_up_low, err_down_low = low_l_data.T
 ell_TT_high, C_ell_TT_high, err_up_high, err_down_high, bestfit_high = high_l_data.T 
 
 def plot_bessel(show=True):
-    plt.plot(z, bessel, lw=0.8)
-    plt.xlim(0, 1000)
-    plt.ylim(-0.02, 0.04)
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.set_title(r'Bessel functions $j_\ell(z)$', fontsize=16)
+    ax.plot(z, bessel, lw=0.8)
+    ax.set_xlim(0, 1000)
+    ax.set_ylim(-0.02, 0.04)
+    ax.set_xlabel('z', fontsize=16)
+    plt.savefig(savefig_path + r'/Bessel_functions.pdf')
+    ax.grid(True)
     if show is True: plt.show()
 
-    plt.plot(keta0, Theta, lw=0.8)
-    plt.xlim(0, 1500)
-    plt.ylim(-0.005, 0.015)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.set_title(r'Transfer functions $\Theta_\ell(k, \eta_0)$', fontsize=16)
+    ax.plot(keta0, Theta, lw=0.8)
+    ax.set_xlim(0, 1500)
+    ax.set_ylim(-0.005, 0.015)
+    ax.set_xlabel(r'$k\eta_0$', fontsize=16)
+    ax.grid(True)
+    plt.savefig(savefig_path + r'/transfer_function.pdf')
     if show is True: plt.show()
 
 def plot_integrand(show=True):
-    plt.plot(keta0, 6*(6+1)*abs(Theta[:, 0])**2/k, lw=0.8)
-    plt.plot(keta0, 100*(100+1)*abs(Theta[:, 1])**2/k, lw=0.8)
-    plt.plot(keta0, 200*(200+1)*abs(Theta[:, 2])**2/k, lw=0.8)
-    plt.plot(keta0, 500*(500+1)*abs(Theta[:, 3])**2/k, lw=0.8)
-    plt.xlim(0, 1500)
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.set_title(r'Integrand $|\Theta_\ell|^2/k$', fontsize=16)
+    ax.plot(keta0, abs(Theta[:, 0])**2/k, lw=0.8)
+    ax.plot(keta0, abs(Theta[:, 1])**2/k, lw=0.8)
+    ax.plot(keta0, abs(Theta[:, 2])**2/k, lw=0.8)
+    ax.plot(keta0, abs(Theta[:, 3])**2/k, lw=0.8)
+    ax.set_xlim(0, 1500)
+    ax.set_xlabel(r'$k\eta_0$', fontsize=16)
+    ax.grid(True)
+    plt.savefig(savefig_path + r'/integrand.pdf')
     if show is True: plt.show()
 
 def plot_power_spectrum(show=True):
-    plt.plot(ell, C_ell)
-    plt.errorbar(ell_TT_low, C_ell_TT_low, yerr=[err_down_low, err_up_low], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2)
-    plt.errorbar(ell_TT_high, C_ell_TT_high, yerr=[err_down_high, err_up_high], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2)
-    plt.xscale('log')
-    plt.yscale('log')
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.set_title(r'CMB Power spectrum $C_\ell\cdot\frac{2\pi}{\ell(\ell+1)}(10^6T_{\rm CMB0})^2$', fontsize=16)
+    ax.plot(ell, C_ell)
+    ax.errorbar(ell_TT_low, C_ell_TT_low, yerr=[err_down_low, err_up_low], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2)
+    ax.errorbar(ell_TT_high, C_ell_TT_high, yerr=[err_down_high, err_up_high], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2)
+    ax.set_xscale('log')
+    ax.set_xlabel(r'$\ell$', fontsize=16)
+    ax.grid(True)
+    plt.savefig(savefig_path + r'/power_spectrum.pdf')
     if show is True: plt.show()
 
-    plt.plot(k, P_k)
-    plt.xscale('log')
-    plt.yscale('log')
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.set_title(r'Matter Power spectrum $P(k)\;(\text{Mpc}/h)^3$', fontsize=16)
+    ax.plot(k, P_k)
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel(r'$k\;(h/\rm Mpc)$', fontsize=16)
+    ax.grid(True)
+    plt.savefig(savefig_path + r'/matter_spectrum.pdf')
     if show is True: plt.show()
 
 def plot_CMB(show=True):
@@ -65,13 +102,17 @@ def plot_CMB(show=True):
     C_ell_normal = C_ell/(ell*(ell+1))*(2*np.pi)/(1e6*2.7255)**2
 
     # Make my own CMAP for the CMB 
-    color_factor = 1.5      # Scales amplitude of total colormap
+    color_factor = 2      # Scales amplitude of total colormap
     get_cmap = plt.get_cmap('RdYlBu_r')
     colors = get_cmap(np.linspace(0, 1, 256))       # 256 not too important, just because print(get_cmap.N) -> 256
     # RdYlBu_r gets too yellow when amplifying colors. Modify map
-    cmap = np.array([[0, 0, 0.5], *colors[10:40:15, :3],                           # Steal from RdYlBu_r
+    # cmap = np.array([[0, 0, 0.4], *colors[10:40:15, :3],                           # Steal from RdYlBu_r
+    #                 [0, 0.8, 1], [1, 1, 0.9], [1, 0.7, 0],         # Light blue, Yellow, Orange
+    #                  *(colors)[256-30::15, :3], [0,0,0]])**color_factor       # Steal from RdYlBu_r
+
+    cmap = np.array([*colors[10:40:15, :3],                           # Steal from RdYlBu_r
                     [0, 0.8, 1], [1, 1, 0.9], [1, 0.7, 0],         # Light blue, Yellow, Orange
-                     *(colors)[256-30::15, :3], [0,0,0]])**color_factor       # Steal from RdYlBu_r
+                     *(colors**(2))[256-30::15, :3]])**color_factor       # Steal from RdYlBu_r
 
     CMB_cmap = mc.LinearSegmentedColormap.from_list('CMB_cmap', cmap, N=300)
     # CMB_cmap = 'hot'
@@ -104,11 +145,12 @@ def plot_CMB(show=True):
     cbar_ax = fig.add_axes([0.5 - cbar_L/2, 0.1, cbar_L, 0.04]) 
     cbar = fig.colorbar(image, cax=cbar_ax, ticks=[mollview_min, mollview_max], format=format_func, orientation='horizontal')
     cbar.ax.tick_params(labelsize=14)
+    cbar.ax.set_xlabel(r'$[\mu K]$', rotation=0, fontsize=16, horizontalalignment='center', verticalalignment='baseline')
     plt.savefig(savefig_path + r'/CMB.pdf')
     if show is True: plt.show()
 
-# plot_bessel(show=False)
-# plot_integrand(show=False)
-# plot_power_spectrum(show=True)
+plot_bessel(show=True)
+plot_integrand(show=True)
+plot_power_spectrum(show=True)
 plot_CMB(show=True)
 

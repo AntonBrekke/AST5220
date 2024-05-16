@@ -33,8 +33,8 @@ class PowerSpectrum {
     const int n_k      = 100;          // Number of k-values
 
     // Extra stuff I need for my code. Given by Hans Winther slides Milestone 4
-    const double n_bessel   = 25.;     // Samples per oscillation for the Bessel function
-    const double n_x_los      = 400.;   // Samples per oscillation of the integrand in the line of sight integral
+    const double n_bessel   = 16.;     // Samples per oscillation for the Bessel function
+    const double n_x_los      = 100.;   // Samples per oscillation of the integrand in the line of sight integral
     const double n_k_ps       = 32.;   // Sample per oscillation when integrating over k
     
     const double x_start     = Constants.x_start;
