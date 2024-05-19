@@ -186,6 +186,8 @@ Vector PowerSpectrum::solve_for_cell(
   std::vector<Spline> & f_ell_spline,
   std::vector<Spline> & g_ell_spline){
   const int nells      = ells.size();
+  Utils::StartTiming("solve_cell");
+
 
   //============================================================================
   // Integrate Cell = Int 4 * pi * P(k) f_ell g_ell dk/k
@@ -196,7 +198,6 @@ Vector PowerSpectrum::solve_for_cell(
   Vector result(nells);
   int N = log_k_array.size();
   double dlogk = (log_k_array[N-1] - log_k_array[0])/N;
-
   // Loop over and integrate for all ells
   for(int il=0; il < nells; il++){
     double ell = ells[il];
@@ -209,6 +210,7 @@ Vector PowerSpectrum::solve_for_cell(
     result[il] = 4.*M_PI * integrate_trapezoid(dlogk, integrand);
   }
 
+  Utils::EndTiming("solve_cell");
   return result;
 }
 
@@ -304,11 +306,11 @@ void PowerSpectrum::output_theta(std::string filename) const{
 
   auto print_data = [&] (const double k){
     fp << k*eta0 << " ";
-    fp << get_thetaT_ell_of_k_spline(test_ell_index[0], k) << " ";
-    fp << get_thetaT_ell_of_k_spline(test_ell_index[1], k) << " ";
-    fp << get_thetaT_ell_of_k_spline(test_ell_index[2], k) << " ";
-    fp << get_thetaT_ell_of_k_spline(test_ell_index[3], k) << " ";
-    fp << get_thetaT_ell_of_k_spline(test_ell_index[4], k) << " ";
+    fp << get_thetaT_ell_of_k_spline(test_ell_index[0], k) << " ";    // 6
+    fp << get_thetaT_ell_of_k_spline(test_ell_index[1], k) << " ";    // 100
+    fp << get_thetaT_ell_of_k_spline(test_ell_index[2], k) << " ";    // 200
+    fp << get_thetaT_ell_of_k_spline(test_ell_index[3], k) << " ";    // 500
+    fp << get_thetaT_ell_of_k_spline(test_ell_index[4], k) << " ";    // 1000
     fp << "\n";
   };
   std::for_each(k_array.begin(), k_array.end(), print_data);

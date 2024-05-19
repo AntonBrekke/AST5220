@@ -354,6 +354,7 @@ def make_table(latex=False):
     x_RelM_eq = x[index_RelM_eq]
     z_RelM_eq = z_of_x[index_RelM_eq]
     t_RelM_eq = (t_of_x/Gyr_to_seconds)[index_RelM_eq]
+    print(f'k_eq: {(Hp_of_x[index_RelM_eq])/c} (for Milestone 4)')
 
     x_MLambda_eq = x[index_MLambda_eq]
     z_MLambda_eq = z_of_x[index_MLambda_eq]
@@ -429,9 +430,9 @@ print(OmegaM[acc_index])
 # plot_time()
 # plot_densities()
 # plot_luminosity_distance_of_z()
-plot_supernovadata_MCMC_fits()
+# plot_supernovadata_MCMC_fits()
 # plot_posterior_PDF_Hubble_param()
 # plot_posterior_PDF_OmegaLambda()
 
-# make_table(latex=False)
+make_table(latex=False)
 
