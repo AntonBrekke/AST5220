@@ -9,7 +9,7 @@ savefig_path = r'/home/antonabr/AST5220/figures/Milestone4'
 
 # Changing standard color cycle to preferred cycle  
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
+colors.insert(5, colors[1]) ; colors[1:5] = colors[2:5]
 plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
 
 Mpc = 3.08567758e22
@@ -20,13 +20,17 @@ transfer_func = np.loadtxt(fr'{path}' + '/transfer_function.txt')
 bessel_func = np.loadtxt(fr'{path}' + '/transfer_function.txt')
 low_l_data = np.loadtxt(fr'{path}' + '/low_l_TT_data.txt')
 high_l_data = np.loadtxt(fr'{path}' + '/high_l_TT_data.txt')
+matter_spectrum_SDSS = np.loadtxt(fr'{path}' + '/matter_spectrum_SDSS.txt')
+matter_spectrum_WMAP = np.loadtxt(fr'{path}' + '/matter_spectrum_WMAP.txt')
 
 ell, C_ell = photon.T
 k, P_k = matter.T
 keta0, Theta = transfer_func[:, 0], transfer_func[:, 1:]
 z, bessel = bessel_func[:, 0], bessel_func[:, 1:]
 ell_TT_low, C_ell_TT_low, err_up_low, err_down_low = low_l_data.T 
-ell_TT_high, C_ell_TT_high, err_up_high, err_down_high, bestfit_high = high_l_data.T 
+ell_TT_high, C_ell_TT_high, err_up_high, err_down_high, bestfit_high = high_l_data.T
+k_SDSS, P_k_SDSS, error_SDSS = matter_spectrum_SDSS.T  
+k_WMAP, P_k_WMAP, error_WMAP = matter_spectrum_WMAP.T
 
 test_ells = [6, 100, 200, 500, 1000]
 
@@ -42,7 +46,9 @@ def plot_bessel(show=True):
     ax.set_xlabel('z', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.grid(True)
-    ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14})
+    leg = ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14}, frameon=False)
+    for legobj in leg.legend_handles:
+        legobj.set_linewidth(2)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/Bessel_functions.pdf')
     if show is True: plt.show()
@@ -57,7 +63,9 @@ def plot_bessel(show=True):
     ax.set_xlabel(r'$k\eta_0$', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.grid(True)
-    ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14})
+    leg = ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14}, frameon=False)
+    for legobj in leg.legend_handles:
+        legobj.set_linewidth(2)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/transfer_function.pdf')
     if show is True: plt.show()
@@ -77,7 +85,9 @@ def plot_integrand(show=True):
     ax.set_xlabel(r'$k\eta_0$', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.grid(True)
-    ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14})
+    leg = ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14}, frameon=False)
+    for legobj in leg.legend_handles:
+        legobj.set_linewidth(2)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/integrand.pdf')
     if show is True: plt.show()
@@ -89,14 +99,14 @@ def plot_power_spectrum(show=True):
 
     cosmic_variance = np.sqrt(2/(2*ell + 1))*C_ell
 
-    ax.set_title(r'CMB Power spectrum $C_\ell\cdot\frac{2\pi}{\ell(\ell+1)}(10^6T_{\rm CMB0})^2$', fontsize=16)
+    ax.set_title(r'CMB Power spectrum $C_\ell\cdot\frac{\ell(\ell+1)}{2\pi}(10^6T_{\rm CMB0})^2$', fontsize=16)
     ax.plot(ell, C_ell, lw=2)
     ax.fill_between(x=ell, y1=C_ell-cosmic_variance, y2=C_ell+cosmic_variance, label=r'$\sqrt{\text{Var}(C_\ell)}$', color='limegreen', edgecolor='darkgreen', alpha=0.3)
     # ax.plot(ell**(1.018), C_ell * 1.13*np.exp(-0.05*(ell/200)**1.5), lw=2)        # Cheating values
-    ax.errorbar(ell_TT_low, C_ell_TT_low, yerr=[err_down_low, err_up_low], label='Planck spectrum', ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2, lw=1)
-    ax.errorbar(ell_TT_high, C_ell_TT_high, yerr=[err_down_high, err_up_high], ls='', marker='o', ms=1.5, ecolor='tab:red', color='k', capsize=2, lw=1)
+    ax.errorbar(ell_TT_low, C_ell_TT_low, yerr=[err_down_low, err_up_low], label='Planck spectrum', ls='', marker='o', ms=3, ecolor='tab:red', color='k', capsize=2, lw=1.5)
+    ax.errorbar(ell_TT_high, C_ell_TT_high, yerr=[err_down_high, err_up_high], ls='', marker='o', ms=3, ecolor='tab:red', color='k', capsize=2, lw=1.5)
     ax.set_xscale('log')
-    ax.set_xlabel(r'$\ell$', fontsize=16)
+    ax.set_xlabel(r'Multipole $\ell$', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.grid(True)
     ax.legend(prop={'size':14}, frameon=False, loc='upper left')
@@ -112,12 +122,15 @@ def plot_power_spectrum(show=True):
     ax.set_title(r'Matter Power spectrum $P(k)\;(\text{Mpc}/h)^3$', fontsize=16)
     ax.plot(k, P_k ,lw=2)
     ax.axvline(k_eq, color='k', ls='--', lw=2, label=r'$k_{\rm eq}$')
+    ax.errorbar(k_SDSS, P_k_SDSS, yerr=error_SDSS, label='SDSS Galaxies (DR7 LRG)', ls='', marker='o', ms=3, ecolor='tab:red', color='k', capsize=2, lw=1.5)
+    ax.errorbar(k_WMAP, P_k_WMAP, yerr=abs(P_k_WMAP - error_WMAP), label='WMAP+ACT', ls='', marker='o', ms=3, ecolor='tab:orange', color='k', capsize=2, lw=1.5)
     ax.set_xscale('log')
     ax.set_yscale('log')
+    ax.set_xlim(2e-3, k[-1])
     ax.set_xlabel(r'$k\;(h/\rm Mpc)$', fontsize=16)
     ax.tick_params(axis='both', which='major', labelsize=14)
     ax.grid(True)
-    ax.legend(prop={'size':14}, frameon=False)
+    ax.legend(prop={'size':14}, frameon=False, loc='lower left')
     fig.tight_layout()
     plt.savefig(savefig_path + r'/matter_spectrum.pdf')
     if show is True: plt.show()
@@ -174,8 +187,8 @@ def plot_CMB(show=True):
     plt.savefig(savefig_path + r'/CMB.pdf')
     if show is True: plt.show()
 
-# plot_bessel(show=True)
-# plot_integrand(show=True)
+plot_bessel(show=True)
+plot_integrand(show=True)
 plot_power_spectrum(show=True)
 plot_CMB(show=True)
 
