@@ -119,6 +119,18 @@ def find_index(data, condition, start=None, end=None, eps=0.1, step=1e-5):
     return index[0]
 # End of index-function
 
+def find_index_v2(data, x=None, value=0, x_start=None, x_end=None):
+    if x is None:
+        index = np.where(np.min(abs(data - value)) == abs(data - value))[0][0]
+        return index
+    else: # Specify what data is function of - used if data = value at multiple x-values
+        if x_start is None: x_start = np.min(x)
+        if x_end is None: x_end = np.max(x)
+        domain = (x >= x_start) * (x <= x_end)
+        data_domain = data[domain]
+        index = np.where(np.min(abs(data_domain - value)) == abs(data_domain - value))[0][0]
+        index = len(x[(x <= x_start)]) + index      # Translate to index on original domain
+        return index
 
 # Approximated functions in different domination eras:
 
@@ -232,8 +244,8 @@ def plot_densities():
     Rel_M_equality = abs(OmegaRel - OmegaM)
     M_Lambda_equality = abs(OmegaLambda - OmegaM)
 
-    index_RelM_eq = find_index(x, Rel_M_equality, start=-10, end=-5)
-    index_MLambda_eq = find_index(x, M_Lambda_equality, start=-1, end=1)
+    index_RelM_eq = find_index_v2(Rel_M_equality, x=x, value=0, x_start=-10, x_end=-5)
+    index_MLambda_eq = find_index_v2(M_Lambda_equality, x=x, value=0, x_start=-1, x_end=1)
     x_RelM_eq = x[index_RelM_eq]
     x_MLambda_eq = x[index_MLambda_eq]
 
@@ -349,8 +361,8 @@ def make_table(latex=False):
     Rel_M_equality = abs(OmegaRel - OmegaM)
     M_Lambda_equality = abs(OmegaLambda - OmegaM)
 
-    index_RelM_eq = find_index(x, Rel_M_equality, start=-10, end=-5)
-    index_MLambda_eq = find_index(x, M_Lambda_equality, start=-1, end=1)
+    index_RelM_eq = find_index_v2(Rel_M_equality, x=x, value=0, x_start=-10, x_end=-5)
+    index_MLambda_eq = find_index_v2(M_Lambda_equality, x=x, value=0, x_start=-1, x_end=1)
     x_RelM_eq = x[index_RelM_eq]
     z_RelM_eq = z_of_x[index_RelM_eq]
     t_RelM_eq = (t_of_x/Gyr_to_seconds)[index_RelM_eq]
@@ -404,8 +416,8 @@ percent_for_domination = 0.5
 M_dom = abs(OmegaM - percent_for_domination)
 Lambda_dom = abs(OmegaLambda - percent_for_domination)
 
-index_M_dom = find_index(x, M_dom, start=-10, end=-5)
-index_Lambda_dom = find_index(x, Lambda_dom, start=-1, end=1)
+index_M_dom = find_index_v2(M_dom, value=0, x_start=-10, x_end=-5)
+index_Lambda_dom = find_index_v2(Lambda_dom, value=0, x_start=-1, x_end=1)
 
 # These are needed for plotting
 x_M_dom = x[index_M_dom]
@@ -428,7 +440,7 @@ print(OmegaM[acc_index])
 # plot_conformal_Hubble()
 # plot_conformal_time()
 # plot_time()
-# plot_densities()
+plot_densities()
 # plot_luminosity_distance_of_z()
 # plot_supernovadata_MCMC_fits()
 # plot_posterior_PDF_Hubble_param()

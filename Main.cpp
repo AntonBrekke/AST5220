@@ -137,6 +137,7 @@ int main(int argc, char **argv){
   power.output_matter_PS("data/Pk.txt");
   power.output_theta("data/transfer_function.txt");
   power.output_bessel_function("data/bessel_function.txt");
+  power.output_line_of_sight_integrand(Constants.k_max, "data/los_integrand_max.txt");
   
   Utils::EndTiming("Everything");
 }

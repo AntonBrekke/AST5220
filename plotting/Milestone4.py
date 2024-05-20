@@ -14,6 +14,7 @@ plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)
 
 Mpc = 3.08567758e22
 
+# Load data
 photon = np.loadtxt(fr'{path}' + '/cells.txt')
 matter = np.loadtxt(fr'{path}' + '/Pk.txt')
 transfer_func = np.loadtxt(fr'{path}' + '/transfer_function.txt')
@@ -22,7 +23,9 @@ low_l_data = np.loadtxt(fr'{path}' + '/low_l_TT_data.txt')
 high_l_data = np.loadtxt(fr'{path}' + '/high_l_TT_data.txt')
 matter_spectrum_SDSS = np.loadtxt(fr'{path}' + '/matter_spectrum_SDSS.txt')
 matter_spectrum_WMAP = np.loadtxt(fr'{path}' + '/matter_spectrum_WMAP.txt')
+los_integrand_max = np.loadtxt(fr'{path}' + '/los_integrand_max.txt')
 
+# Assign data
 ell, C_ell = photon.T
 k, P_k = matter.T
 keta0, Theta = transfer_func[:, 0], transfer_func[:, 1:]
@@ -31,6 +34,7 @@ ell_TT_low, C_ell_TT_low, err_up_low, err_down_low = low_l_data.T
 ell_TT_high, C_ell_TT_high, err_up_high, err_down_high, bestfit_high = high_l_data.T
 k_SDSS, P_k_SDSS, error_SDSS = matter_spectrum_SDSS.T  
 k_WMAP, P_k_WMAP, error_WMAP = matter_spectrum_WMAP.T
+x_los_max, I_los_max = los_integrand_max[:,0], los_integrand_max[:, 1:], 
 
 test_ells = [6, 100, 200, 500, 1000]
 
@@ -90,6 +94,25 @@ def plot_integrand(show=True):
         legobj.set_linewidth(2)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/integrand.pdf')
+    if show is True: plt.show()
+
+def plot_line_of_sight_integrand(show=True):
+    
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    ax.set_title(r'Line of sight integrand $\tilde S(k_{\rm max},x)j_{\ell}[k_{\rm max}(\eta_0-\eta(x))]$', fontsize=16)
+
+    ax.plot(x_los_max, I_los_max, lw=0.8)
+    ax.set_xlabel(r'x=ln(a)', fontsize=16)
+    ax.tick_params(axis='both', which='major', labelsize=14)
+    ax.set_xlim(-8, 0)
+    ax.set_ylim(-5e-5, 5e-5)
+    ax.grid(True)
+    leg = ax.legend([fr'$\ell$={i}' for i in test_ells], prop={'size': 14}, frameon=False)
+    for legobj in leg.legend_handles:
+        legobj.set_linewidth(2)
+    fig.tight_layout()
+    plt.savefig(savefig_path + r'/line_of_sight_integrand.pdf')
     if show is True: plt.show()
 
 def plot_power_spectrum(show=True):
@@ -159,12 +182,21 @@ def plot_CMB(show=True):
     nside = int(2**10)       # Resolution of image    
     print("Approximate resolution at NSIDE {} is {:.2} deg".format(nside, hp.nside2resol(nside, arcmin=True) / 60))     # stole this from https://healpy.readthedocs.io/en/latest/tutorial.html
     lmax = int(np.max(ell))
-    seed = 15012001         # Set seed to get same plot each time.
+    seed = 5220         # Set seed to get same plot each time.
     np.random.seed(seed)
-    alm = hp.synalm(C_ell_normal, lmax=lmax, mmax=lmax)
+    cmb_map = hp.synfast(C_ell_normal, nside=nside, lmax=lmax, mmax=lmax)
+    """
+    If you are analyzing a map from an instrument with a specific beam width, 
+    you can correct the power spectrum by the smoothing factor caused by that 
+    beam and obtain a better approximation 
+    of the power spectrum of the original sky.
+    https://www.zonca.dev/posts/2021-04-27-correct-beam-healpy
+    """
+    deg = 9/60     # arcmin
+    cmb_map = hp.smoothing(cmb_map, sigma=deg*np.pi/180)
 
     # Generate and plot the map
-    cmb_map = hp.alm2map(alm, nside=nside, lmax=lmax, mmax=lmax)
+    # cmb_map = hp.alm2map(alm, nside=nside, lmax=lmax, mmax=lmax)
 
     fig = plt.figure()
     fig.suptitle('CMB map', fontsize=20, y=0.95)
@@ -187,8 +219,9 @@ def plot_CMB(show=True):
     plt.savefig(savefig_path + r'/CMB.pdf')
     if show is True: plt.show()
 
-plot_bessel(show=True)
+# plot_bessel(show=True)
 plot_integrand(show=True)
-plot_power_spectrum(show=True)
-plot_CMB(show=True)
+# plot_line_of_sight_integrand(show=True)
+# plot_power_spectrum(show=True)
+# plot_CMB(show=True)
 

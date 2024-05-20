@@ -301,9 +301,6 @@ void PowerSpectrum::output_theta(std::string filename) const{
   double log_k_max = log(k_max);
   Vector log_k_array = Utils::linspace(log_k_min, log_k_max, 10000); // Linearly spaced logarithmic values
   Vector k_array = exp(log_k_array);
-  double c = Constants.c;
-  double H0 = cosmo -> get_H0();
-
   auto print_data = [&] (const double k){
     fp << k*eta0 << " ";
     fp << get_thetaT_ell_of_k_spline(test_ell_index[0], k) << " ";    // 6
@@ -332,3 +329,19 @@ void PowerSpectrum::output_bessel_function(std::string filename) const{
   std::for_each(z_array.begin(), z_array.end(), print_data);
 }
 
+void PowerSpectrum::output_line_of_sight_integrand(const double k, std::string filename) const{
+  // Output of theta l for l={6, 100, 200, 500, 1000}
+  std::ofstream fp(filename.c_str());
+  Vector x_array = Utils::linspace(x_start_los, x_end_los, 10000);
+  auto print_data = [&] (const double x){
+    double arg = k * (cosmo -> eta_of_x(0.0) - cosmo -> eta_of_x(x));
+    fp << x << " ";
+    fp << pert->get_Source_T(x,k) * get_bessel_func(test_ell_index[0], arg) << " ";  // 6
+    fp << pert->get_Source_T(x,k) * get_bessel_func(test_ell_index[1], arg) << " ";  // 100
+    fp << pert->get_Source_T(x,k) * get_bessel_func(test_ell_index[2], arg) << " ";  // 200
+    fp << pert->get_Source_T(x,k) * get_bessel_func(test_ell_index[3], arg) << " ";  // 500
+    fp << pert->get_Source_T(x,k) * get_bessel_func(test_ell_index[4], arg) << " ";  // 1000
+    fp << "\n";
+  };
+  std::for_each(x_array.begin(), x_array.end(), print_data);
+}

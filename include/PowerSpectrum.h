@@ -139,6 +139,7 @@ class PowerSpectrum {
     void output_matter_PS(std::string filename) const;
     void output_theta(std::string filename) const;
     void output_bessel_function(std::string filename) const;
+    void output_line_of_sight_integrand(const double k, std::string filename) const;
 };
 
 #endif
