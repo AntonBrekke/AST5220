@@ -158,9 +158,11 @@ def plot_power_spectrum(show=True):
     plt.savefig(savefig_path + r'/matter_spectrum.pdf')
     if show is True: plt.show()
 
-def plot_CMB(show=True):
+def plot_CMB(show=True, smooth=False, deg=10):
     # Normalize spectrum back
     C_ell_normal = C_ell/(ell*(ell+1))*(2*np.pi)
+
+    filename = r'/CMB.pdf'
 
     # Make my own CMAP for the CMB 
     color_factor = 2      # Scales amplitude of total colormap
@@ -192,8 +194,10 @@ def plot_CMB(show=True):
     of the power spectrum of the original sky.
     https://www.zonca.dev/posts/2021-04-27-correct-beam-healpy
     """
-    deg = 9/60     # arcmin
-    cmb_map = hp.smoothing(cmb_map, sigma=deg*np.pi/180)
+    deg_arcmin = deg/60     # arcmin
+    if smooth is True: 
+        cmb_map = hp.smoothing(cmb_map, sigma=deg_arcmin*np.pi/180)
+        filename = r'/CMB' + r'_smooth.pdf'
 
     # Generate and plot the map
     # cmb_map = hp.alm2map(alm, nside=nside, lmax=lmax, mmax=lmax)
@@ -216,12 +220,12 @@ def plot_CMB(show=True):
     cbar = fig.colorbar(image, cax=cbar_ax, ticks=[mollview_min, mollview_max], format=format_func, orientation='horizontal')
     cbar.ax.tick_params(labelsize=14)
     cbar.ax.set_xlabel(r'$[\mu K]$', rotation=0, fontsize=16, horizontalalignment='center', verticalalignment='baseline')
-    plt.savefig(savefig_path + r'/CMB.pdf')
+    plt.savefig(savefig_path + filename)
     if show is True: plt.show()
 
 # plot_bessel(show=True)
-plot_integrand(show=True)
+# plot_integrand(show=True)
 # plot_line_of_sight_integrand(show=True)
 # plot_power_spectrum(show=True)
-# plot_CMB(show=True)
+plot_CMB(show=True, smooth=True)
 
