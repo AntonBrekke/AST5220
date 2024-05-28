@@ -42,7 +42,7 @@ def plot_data(data_list=['Theta_0'], factor=[1], kvals=[0.1, 0.01, 0.001], title
         for k_index, ki in enumerate(k_list):
             # Get data
             perturbations_data = np.loadtxt(fr'{path}' + f'/perturbations_k{ki}.txt')
-            x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, delta_cdm, delta_b, v_cdm, v_b, eta_of_x, T5, T50, T500 = perturbations_data.T
+            x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, delta_cdm, delta_b, v_cdm, v_b, eta_of_x, Hp_of_x, T5, T50, T500 = perturbations_data.T
 
             data_dict = {'x': x, 'Theta_0': Theta0, 'Theta_1': Theta1, 'Theta_2': Theta2,
                         'Phi': Phi, 'Psi': Psi, 'Source_T': Source_T, 'delta_CDM': abs(delta_cdm),
@@ -115,7 +115,7 @@ def compare_baryon_photon(show=True):
     loc2 = ['lower right', 'upper left', 'upper left']
     for i, ki in enumerate(k_list):
         perturbations_data = np.loadtxt(fr'{path}' + f'/perturbations_k{ki}.txt')
-        x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, delta_cdm, delta_b, v_cdm, v_b, eta_of_x, T5, T50, T500 = perturbations_data.T
+        x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, delta_cdm, delta_b, v_cdm, v_b, eta_of_x, Hp_of_x, T5, T50, T500 = perturbations_data.T
 
         horizon_crossing_index = find_horizon_crossing(eta_of_x, ki)
 
@@ -156,9 +156,29 @@ def compare_baryon_photon(show=True):
         plt.savefig(savefig_path + f'/compare_photon_baryon_k={ki}.pdf')
         if show is True: plt.show()
 
-# Control center for running plots
-plot_density_perturbations(show=True)
-plot_velocity_perturbations(show=True)
-plot_photon_quadropole(show=True)
-plot_potentials(show=True)
-compare_baryon_photon(show=True)
+def plot_gauge_invariant_density(show=True):
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    klist = np.array([0.1, 0.01, 0.001])
+
+    d_arr = np.zeros(3)
+    i = 0
+    for ki in klist:
+        perturbations_data = np.loadtxt(fr'{path}' + f'/perturbations_k{ki}.txt')
+        x, Theta0, Theta1, Theta2, Phi, Psi, Source_T, delta_cdm, delta_b, v_cdm, v_b, eta_of_x, Hp_of_x, T5, T50, T500 = perturbations_data.T
+        ax.plot(ki, delta_cdm[-1] - 3*Hp_of_x[-1]/ki*v_cdm[-1], 'ro')
+        d_arr[i] = delta_cdm[-1] - 3*Hp_of_x[-1]/ki*v_cdm[-1]
+        i += 1
+    plt.show()
+    plt.plot(klist, d_arr)
+    plt.show()
+
+if __name__ == "__main__":
+    # Control center for running plots
+    plot_density_perturbations(show=True)
+    plot_velocity_perturbations(show=True)
+    plot_photon_quadropole(show=True)
+    plot_potentials(show=True)
+    compare_baryon_photon(show=True)
+    # plot_gauge_invariant_density(show=True)

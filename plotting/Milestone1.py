@@ -149,7 +149,7 @@ def etaHp_DE_pr_c(x):
 
 # Define plotting functions: 
 
-def plot_demonstrate_code():
+def plot_demonstrate_code(show=True):
     # Define plotting domains for dominations 
     domain_Rel_dom = np.where(x < x_M_dom) 
     domain_M_dom = np.logical_and(x > x_M_dom, x < x_Lambda_dom) 
@@ -175,7 +175,7 @@ def plot_demonstrate_code():
 
     plot_Hp_derivatives.format_plot('x=ln(a)', grid=True)
     plt.savefig(savefig_path + r'/Hp_derivatives.pdf')
-    plt.show()
+    if show is True: plt.show()
 
     # Skip some points for plotting 
     N_points_skip = int(0.045*len(x))
@@ -197,9 +197,9 @@ def plot_demonstrate_code():
     plot_etaHp_pr_c.ax.axhline((eta_of_x*Hp_of_x/c)[acc_index], color='k', ls='--')
     plot_etaHp_pr_c.format_plot('x=ln(a)', yscale='log', grid=True)
     plt.savefig(savefig_path + r'/etaHp_pr_c.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_conformal_Hubble():
+def plot_conformal_Hubble(show=True):
     title = r'Evolution of conformal Hubble factor $\mathcal{H}(x)\;\left(\frac{100km/s}{Mpc}\right)$'
     plot_Hp = make_plot(-12, 1, title=title)
     plot_Hp.plot(x, Hp_of_x / pr_second_to_km_pr_second_pr_Mparsec, lw=2)
@@ -209,9 +209,9 @@ def plot_conformal_Hubble():
 
     plot_Hp.fig.tight_layout()
     plt.savefig(savefig_path + r'/Hp.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_conformal_time():
+def plot_conformal_time(show=True):
     title = r'Evolution of conformal time $\frac{\eta(x)}{c}\;\left(\frac{Mpc}{c}\right)$'
     plot_eta_pr_c = make_plot(title=title)
     plot_eta_pr_c.plot(x, eta_of_x/(1e6*parsec*c), lw=2)
@@ -221,9 +221,9 @@ def plot_conformal_time():
 
     plot_eta_pr_c.fig.tight_layout()
     plt.savefig(savefig_path + r'/eta_pr_c.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_time():
+def plot_time(show=True):
     plot_t = make_plot(title=r'Evolution of cosmic time $t(a)\;(Gyr)$')
     plot_t.plot(x, t_of_x / Gyr_to_seconds, lw=2)
     plot_t.format_plot('x=ln(a)', yscale='log', grid=True)
@@ -232,9 +232,9 @@ def plot_time():
 
     plot_t.fig.tight_layout()
     plt.savefig(savefig_path + r'/cosmic_time.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_densities():
+def plot_densities(show=True):
     plot_densities = make_plot(title=r'$\Omega_i$')
     plot_densities.plot(x, OmegaRel, label=r'$\Omega_{\text{R}}$', lw=2)
     plot_densities.plot(x, OmegaM, label=r'$\Omega_{\text{M}}$', lw=2)
@@ -256,9 +256,9 @@ def plot_densities():
 
     plot_densities.fig.tight_layout()
     plt.savefig(savefig_path + r'/densities.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_luminosity_distance_of_z():
+def plot_luminosity_distance_of_z(show=True):
     fig = plt.figure()
     ax = fig.add_subplot()
 
@@ -277,9 +277,9 @@ def plot_luminosity_distance_of_z():
     ax.legend(prop={'size': 14}, frameon=False)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/luminosity_distance.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_supernovadata_MCMC_fits():
+def plot_supernovadata_MCMC_fits(show=True):
     fig = plt.figure()
     ax = fig.add_subplot()
 
@@ -313,9 +313,9 @@ def plot_supernovadata_MCMC_fits():
     ax.legend(prop={'size':14}, loc='center left', bbox_to_anchor=(0, 0.7), frameon=False)
     fig.tight_layout()
     plt.savefig(savefig_path + r'/supernovadata_MCMC_fits.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_posterior_PDF_Hubble_param():
+def plot_posterior_PDF_Hubble_param(show=True):
     # H0 = h / Constants.H0_over_h, see BackgroundCosmology.cpp. PDF will be same.
     H0 = h * H0_over_h
     posterior_H0_pdf = make_plot(title=r'Posterior PDF for $H_0$', x_start=66)
@@ -337,9 +337,9 @@ def plot_posterior_PDF_Hubble_param():
     posterior_H0_pdf.ax.legend(prop={'size': 14}, loc='center left', frameon=False, bbox_to_anchor=(0.03, 0.85))
     posterior_H0_pdf.format_plot(xlabel=r'$H_0$', tight=True)
     plt.savefig(savefig_path + r'/posterior_PDF_Hubble_param.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_posterior_PDF_OmegaLambda():
+def plot_posterior_PDF_OmegaLambda(show=True):
     OmegaLambda_sn = 1 - (OmegaM_sn + OmegaK_sn)
     posterior_OmegaLambda_pdf = make_plot(title=r'Posterior PDF for $\Omega_{\Lambda}$')
     posterior_OmegaLambda_pdf.hist(OmegaLambda_sn, bins=75, density=True)
@@ -354,7 +354,7 @@ def plot_posterior_PDF_OmegaLambda():
 
     posterior_OmegaLambda_pdf.fig.tight_layout()
     plt.savefig(savefig_path + r'/posterior_PDF_OmegaLambda.pdf')
-    plt.show()
+    if show is True: plt.show()
 
 def make_table(latex=False):
     # Find density parameters equalities 
@@ -366,11 +366,12 @@ def make_table(latex=False):
     x_RelM_eq = x[index_RelM_eq]
     z_RelM_eq = z_of_x[index_RelM_eq]
     t_RelM_eq = (t_of_x/Gyr_to_seconds)[index_RelM_eq]
-    print(f'k_eq: {(Hp_of_x[index_RelM_eq])/c} (for Milestone 4)')
+    print(f'k_eq radiation-matter equality: {(Hp_of_x[index_RelM_eq])/c} (for Milestone 4)')
 
     x_MLambda_eq = x[index_MLambda_eq]
     z_MLambda_eq = z_of_x[index_MLambda_eq]
     t_MLambda_eq = (t_of_x/Gyr_to_seconds)[index_MLambda_eq]
+    print(f'k_eq matter-DE equality: {(Hp_of_x[index_MLambda_eq])/c} (for Milestone 4)')
 
     # Find age of universe today (x=0)
     age_index = find_index(t_of_x/Gyr_to_seconds, abs(x))
@@ -398,7 +399,6 @@ def make_table(latex=False):
         tab_data_latex.add_rows(tab_print)
         print(lt.draw_latex(tab_data_latex))
 # End of plotting functions 
-
 
 # Scaling factor instead of x may be more intuitive
 a = np.exp(x)    
@@ -435,16 +435,17 @@ print(OmegaLambda[acc_index])
 print(OmegaR[acc_index])
 print(OmegaM[acc_index])
 
-# Control unit for plotting 
-# plot_demonstrate_code()
-# plot_conformal_Hubble()
-# plot_conformal_time()
-# plot_time()
-plot_densities()
-# plot_luminosity_distance_of_z()
-# plot_supernovadata_MCMC_fits()
-# plot_posterior_PDF_Hubble_param()
-# plot_posterior_PDF_OmegaLambda()
+if __name__ == "__main__":
+    # Control unit for plotting 
+    plot_demonstrate_code(show=True)
+    plot_conformal_Hubble(show=True)
+    plot_conformal_time(show=True)
+    plot_time(show=True)
+    plot_densities(show=True)
+    plot_luminosity_distance_of_z(show=True)
+    plot_supernovadata_MCMC_fits(show=True)
+    plot_posterior_PDF_Hubble_param(show=True)
+    plot_posterior_PDF_OmegaLambda(show=True)
 
-make_table(latex=False)
+    make_table(latex=False)
 

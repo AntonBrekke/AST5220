@@ -9,8 +9,8 @@ savefig_path = r'/home/antonabr/AST5220/figures/Milestone4'
 
 # Changing standard color cycle to preferred cycle  
 colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-colors.insert(5, colors[1]) ; colors[1:5] = colors[2:5]
-plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors) 
+colors.insert(6, colors[1]) ; colors[1:5] = colors[2:5]
+plt.rcParams['axes.prop_cycle'] = plt.cycler(color=colors)  
 
 Mpc = 3.08567758e22
 
@@ -140,11 +140,21 @@ def plot_power_spectrum(show=True):
     fig = plt.figure()
     ax = fig.add_subplot()
     
-    k_eq = 3.3634935539305665e-25 * Mpc/(0.67)          # k_eq = a_eq*H(a_eq) / c * (Mpc/h). a_eq*H(a_eq) printed in Milestone1.py, h=0.67.
+    # Radiation-matter equality
+    k_eq_RM = 3.3634935539305665e-25 * Mpc/(0.67)          # k_eq = a_eq*H(a_eq) / c * (Mpc/h). a_eq*H(a_eq) printed in Milestone1.py, h=0.67.
+
+    k_max = np.mean(k[P_k==np.max(P_k)])
+    k_eq_MDE = k_max
+    print(f'Theoretical limit of largest structure: {2*np.pi/(k_eq_RM*0.67*3e-7):.5e}ly, {2*np.pi/(k_eq_RM*0.67)}Mpc')
+    print(f'Theoretical limit of largest structure: {2*np.pi/(k_max*0.67*3e-7):.5e}ly, {2*np.pi/(k_max*0.67)}Mpc')
+    
+    # Matter-DE equality
+    # k_eq_MDE = 6.554567827053208e-27 * Mpc/(0.67) 
 
     ax.set_title(r'Matter Power spectrum $P(k)\;(\text{Mpc}/h)^3$', fontsize=16)
     ax.plot(k, P_k ,lw=2)
-    ax.axvline(k_eq, color='k', ls='--', lw=2, label=r'$k_{\rm eq}$')
+    ax.axvline(k_eq_RM, color='k', ls='--', lw=2, label=r'$k_{\rm eq}$')
+    ax.axvline(k_eq_MDE, color='k', ls='--', lw=2, label=r'$k_{\rm eq,MDE}$')
     ax.errorbar(k_SDSS, P_k_SDSS, yerr=error_SDSS, label='SDSS Galaxies (DR7 LRG)', ls='', marker='o', ms=3, ecolor='tab:red', color='k', capsize=2, lw=1.5)
     ax.errorbar(k_WMAP, P_k_WMAP, yerr=abs(P_k_WMAP - error_WMAP), label='WMAP+ACT', ls='', marker='o', ms=3, ecolor='tab:orange', color='k', capsize=2, lw=1.5)
     ax.set_xscale('log')
@@ -223,9 +233,11 @@ def plot_CMB(show=True, smooth=False, deg=10):
     plt.savefig(savefig_path + filename)
     if show is True: plt.show()
 
-# plot_bessel(show=True)
-# plot_integrand(show=True)
-# plot_line_of_sight_integrand(show=True)
-# plot_power_spectrum(show=True)
-plot_CMB(show=True, smooth=True)
+if __name__ == "__main__":
+    # Control unit for plotting 
+    plot_bessel(show=True)
+    plot_integrand(show=True)
+    plot_line_of_sight_integrand(show=True)
+    plot_power_spectrum(show=True)
+    plot_CMB(show=True, smooth=False)
 

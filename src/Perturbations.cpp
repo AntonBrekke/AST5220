@@ -706,6 +706,7 @@ void Perturbations::output(const double k, const std::string filename) const{
     fp << get_v_cdm(x,k)                             << " ";
     fp << get_v_b(x,k)                               << " ";
     fp << cosmo -> eta_of_x(x)                       << " ";
+    fp << cosmo -> Hp_of_x(x)                       << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(5,   arg) << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(50,  arg) << " ";
     fp << get_Source_T(x,k) * Utils::j_ell(500, arg) << " ";

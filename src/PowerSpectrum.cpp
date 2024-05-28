@@ -228,14 +228,14 @@ double PowerSpectrum::primordial_power_spectrum(const double k) const{
 
 double PowerSpectrum::get_matter_power_spectrum(const double x, const double k_mpc) const{
   // Variables and constants
-  double OmegaM = cosmo -> get_OmegaM(x);
+  double OmegaM = cosmo -> get_OmegaM();
   double Hp     = cosmo -> Hp_of_x(x);
   double Phi    = pert -> get_Phi(x, k_mpc);
   double c      = Constants.c;
   double P_prim = 2.*pow(M_PI, 2.)*primordial_power_spectrum(k_mpc) / pow(k_mpc, 3.);
 
   // Calculate Delta_M
-  double Delta_M = 2.0*pow(c*k_mpc, 2.0)*Phi / (3.0*OmegaM*pow(Hp, 2.));
+  double Delta_M = 2.0*pow(c*k_mpc, 2.0)*Phi*exp(x) / (3.0*OmegaM*pow(Hp, 2.));
 
   // Calculate P(k,x)
   double pofk = pow(Delta_M, 2.) * P_prim ;

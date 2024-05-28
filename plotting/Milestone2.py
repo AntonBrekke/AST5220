@@ -43,7 +43,7 @@ def find_index(data, x=None, value=0, x_start=None, x_end=None):
 # End of index-function
 
 
-def plot_fractional_electron_density():
+def plot_fractional_electron_density(show=True):
     # Plot fractional electron density Xe
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -67,10 +67,10 @@ def plot_fractional_electron_density():
 
     # Show 
     plt.savefig(savefig_path + r'/frac_electron_density.pdf')
-    plt.show()
+    if show is True: plt.show()
 
 
-def plot_optical_depth():
+def plot_optical_depth(show=True):
     # Plot optical depth tau
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -94,9 +94,9 @@ def plot_optical_depth():
 
     # Show 
     plt.savefig(savefig_path + r'/optical_depth.pdf')
-    plt.show()
+    if show is True: plt.show()
 
-def plot_visibility_function():
+def plot_visibility_function(show=True):
     # Plot visibility function g
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -123,7 +123,7 @@ def plot_visibility_function():
 
     # Show
     plt.savefig(savefig_path + r'/visibility_function.pdf')
-    plt.show()
+    if show is True: plt.show()
 # End of plotting functions 
 
 def find_values(latex=False):
@@ -175,9 +175,11 @@ def find_values(latex=False):
     return [x_recombination, x_last_scatter, Xe_freeze_out]
 # End of find values 
 
+
 x_recombination, x_last_scatter, Xe_freeze_out = find_values(latex=False)
 
-# Control unit for calling functions
-plot_fractional_electron_density()
-plot_optical_depth()
-plot_visibility_function()
+if __name__ == "__main__":
+    # Control unit for calling functions
+    plot_fractional_electron_density(show=True)
+    plot_optical_depth(show=True)
+    plot_visibility_function(show=True)
