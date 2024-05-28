@@ -39,28 +39,31 @@ VPATH=src/ : include/
 TARGETS := cmb
 all: $(TARGETS)
 
+# Create obj directory if it doesn't exist
+$(shell mkdir -p obj)
+
 # OBJECT FILES
-OBJS = Main.o Utils.o BackgroundCosmology.o RecombinationHistory.o Perturbations.o PowerSpectrum.o Spline.o ODESolver.o
+OBJS = obj/Main.o obj/Utils.o obj/BackgroundCosmology.o obj/RecombinationHistory.o obj/Perturbations.o obj/PowerSpectrum.o obj/Spline.o obj/ODESolver.o
 
 # DEPENDENCIES
-Main.o                  : BackgroundCosmology.h RecombinationHistory.h Perturbations.h PowerSpectrum.h
-Spline.o                : Spline.h
-ODESolver.o             : ODESolver.h
-Utils.o                 : Utils.h Spline.h ODESolver.h
-BackgroundCosmology.o   : BackgroundCosmology.h Utils.h Spline.h ODESolver.h
-RecombinationHistory.o  : RecombinationHistory.h BackgroundCosmology.h
-Perturbations.o         : Perturbations.h BackgroundCosmology.h RecombinationHistory.h
-PowerSpectrum.o         : PowerSpectrum.h BackgroundCosmology.h RecombinationHistory.h Perturbations.h
-Examples.o              : Utils.h Spline.h ODESolver.h
+obj/Main.o                  : BackgroundCosmology.h RecombinationHistory.h Perturbations.h PowerSpectrum.h
+obj/Spline.o                : Spline.h
+obj/ODESolver.o             : ODESolver.h
+obj/Utils.o                 : Utils.h Spline.h ODESolver.h
+obj/BackgroundCosmology.o   : BackgroundCosmology.h Utils.h Spline.h ODESolver.h
+obj/RecombinationHistory.o  : RecombinationHistory.h BackgroundCosmology.h
+obj/Perturbations.o         : Perturbations.h BackgroundCosmology.h RecombinationHistory.h
+obj/PowerSpectrum.o         : PowerSpectrum.h BackgroundCosmology.h RecombinationHistory.h Perturbations.h
+obj/Examples.o              : Utils.h Spline.h ODESolver.h
 
-examples: Examples.o Utils.o Spline.o ODESolver.o
+examples: obj/Examples.o obj/Utils.o obj/Spline.o obj/ODESolver.o
 	${CC} -o $@ $^ $C $(INC) $(LIBS)
 
 cmb: $(OBJS)
 	${CC} -o $@ $^ $C $(INC) $(LIBS)
 
-%.o: %.cpp
+obj/%.o: %.cpp
 	${CC}  -c -o $@ $< $C $(INC) 
 
 clean:
-	rm -rf $(TARGETS) *.o 
+	rm -rf $(TARGETS) obj/*.o 
