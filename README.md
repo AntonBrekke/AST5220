@@ -1,4 +1,4 @@
-# AST5220
+# Cosmology II, AST5220
 ## This repo contains the project for the AST5220 course. 
 
 Compile files by running "make cmb" in the same folder as the Makefile. 
