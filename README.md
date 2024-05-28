@@ -19,7 +19,7 @@ Calculate the Recombination History for our universe.
 To run Milestone2.py, make sure to change/comment out the path of "path" and "savefig_path".
 
 ### Milestone 3
-Calculate perturbations in the metric of the Universe.
+Calculate Perturbations in the metric of the Universe.
 To run Milestone3.py, make sure to change/comment out the path of "path" and "savefig_path".
 
 ### Milestone 4
