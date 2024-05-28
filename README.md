@@ -2,7 +2,7 @@
 ## This repo contains the project for the AST5220 course. 
 
 Compile files by typing "make cmb" in the terminal while being in the same folder as the Makefile. 
-Run file in main folder by typing "./cmb" in terminal. To run the project, you would have to install Gnu Scientific Library (GSL). 
+Run file in main folder by typing "./cmb" in terminal. To run the project, you would have to install Gnu Scientific Library (GSL) (see how below). 
 
 ### Milestone 1 
 Calcualte the Background Cosmology.
