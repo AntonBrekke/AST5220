@@ -8,7 +8,7 @@ The report can be found [here](https://github.com/AntonBrekke/AST5220/tree/main/
 This project was done during the course AST5220 at ITA University of Oslo, by the help of templates found at [this GitHub](https://github.com/HAWinther/AST5220-Cosmology/tree/master). The project is mainly done in C++, with expceptions to plotting/analyzing numerical results. During the project, we develop an Einstein-Boltzmann solver, and essentially solve for the CMB power spectrum. 
 
 ### Website
-All relevant information about the project and the different milestones can be found on this [website](https://cmb.wintherscoming.no/).
+All relevant information about the project and the different Milestones can be found on this [website](https://cmb.wintherscoming.no/).
 
 ### Running the codes
 Compile files by typing "make cmb" in the terminal while being in the same folder as the Makefile. 
