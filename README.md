@@ -7,6 +7,9 @@ The report can be found [here](https://github.com/AntonBrekke/AST5220/tree/main/
 
 This project was done during the course AST5220 at ITA University of Oslo, by the help of templates found at [this GitHub](https://github.com/HAWinther/AST5220-Cosmology/tree/master). The project is mainly done in C++, with expceptions to plotting/analyzing numerical results. During the project, we develop an Einstein-Boltzmann solver, and essentially solve for the CMB power spectrum. 
 
+### Website
+All relevant information about the project and the different milestones can be found on this [website](https://cmb.wintherscoming.no/).
+
 ### Running the codes
 Compile files by typing "make cmb" in the terminal while being in the same folder as the Makefile. 
 Run file in main folder by typing "./cmb" in terminal. To run the project, you would have to install Gnu Scientific Library (GSL) (see how below). 
@@ -26,9 +29,6 @@ To run Milestone3.py, make sure to change/comment out the path of "path" and "sa
 #### Milestone 4
 Calculate Powerspectrum of the CMB.
 To run Milestone4.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
-
-## Website
-All relevant information about the project and the different milestones can be found on this [website](https://cmb.wintherscoming.no/).
 
 ## How to install GSL
 
