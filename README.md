@@ -16,19 +16,19 @@ Run file in main folder by typing "./cmb" in terminal. To run the project, you w
 
 #### Milestone 1 
 Calcualte the Background Cosmology (main code BackgroundCosmology.cpp) of the Universe.
-To run Milestone1.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone1.py for plots/results, make sure to change/comment out the variables of "path" and "savefig_path" in the code.
 
 #### Milestone 2
 Calculate the Recombination History (main code RecombinationHistory.cpp) for our universe. 
-To run Milestone2.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone2.py for plots/results, make sure to change/comment out the variables of "path" and "savefig_path" in the code.
 
 #### Milestone 3
 Calculate Perturbations in the metric (main code Perturbations.cpp) of the Universe.
-To run Milestone3.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone3.py for plots/results, make sure to change/comment out the variables of "path" and "savefig_path" in the code.
 
 #### Milestone 4
 Calculate Powerspectrum of the CMB (main code PowerSpectrum.cpp).
-To run Milestone4.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone4.py for plots/results, make sure to change/comment out the variables of "path" and "savefig_path" in the code.
 
 ## How to install GSL
 
