@@ -5,7 +5,7 @@ Through the $\Lambda\rm CDM$-model with initial values from \cite{Planck_data}, 
 
 The report can be found [here](https://github.com/AntonBrekke/AST5220/tree/main/report).
 
-This project was done during the course AST5220 at ITA University of Oslo, by the help of templates found at [this GitHub](https://github.com/HAWinther/AST5220-Cosmology/tree/master). The project is mainly done in C++, with expceptions to plotting/analyzing numerical results. During the project, we develop an Einstein-Boltzmann solver, and essentially solve for the CMB power spectrum. 
+This project was done during the course AST5220 at ITA University of Oslo, by the help of templates found at [this GitHub](https://github.com/HAWinther/AST5220-Cosmology/tree/master). The project is mainly done in C++, with expceptions to plotting/analyzing numerical results which is done in Python. During the project, we develop an Einstein-Boltzmann solver, and essentially solve for the CMB power spectrum. 
 
 ### Website
 All relevant information about the project and the different Milestones can be found on this [website](https://cmb.wintherscoming.no/).
@@ -16,19 +16,19 @@ Run file in main folder by typing "./cmb" in terminal. To run the project, you w
 
 #### Milestone 1 
 Calcualte the Background Cosmology (main code BackgroundCosmology.cpp) of the Universe.
-To run Milestone1.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone1.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 #### Milestone 2
 Calculate the Recombination History (main code RecombinationHistory.cpp) for our universe. 
-To run Milestone2.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone2.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 #### Milestone 3
 Calculate Perturbations in the metric (main code Perturbations.cpp) of the Universe.
-To run Milestone3.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone3.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 #### Milestone 4
 Calculate Powerspectrum of the CMB (main code PowerSpectrum.cpp).
-To run Milestone4.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
+To run Milestone4.py for plots/results, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 ## How to install GSL
 
