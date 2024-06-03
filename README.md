@@ -13,6 +13,7 @@ All relevant information about the project and the different Milestones can be f
 ## Running the code
 Compile files by typing "make cmb" in the terminal while being in the same folder as the Makefile. 
 Run file in main folder by typing "./cmb" in terminal. To run the project, you would have to install Gnu Scientific Library (GSL) (see how below).
+The later Milestones generally depend on the code from previous Milestones. 
 
 #### Milestone 1 
 Calcualte the Background Cosmology (main code BackgroundCosmology.cpp) of the Universe.
