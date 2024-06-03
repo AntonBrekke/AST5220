@@ -12,22 +12,22 @@ All relevant information about the project and the different Milestones can be f
 
 ## Running the code
 Compile files by typing "make cmb" in the terminal while being in the same folder as the Makefile. 
-Run file in main folder by typing "./cmb" in terminal. To run the project, you would have to install Gnu Scientific Library (GSL) (see how below). 
+Run file in main folder by typing "./cmb" in terminal. To run the project, you would have to install Gnu Scientific Library (GSL) (see how below).
 
 #### Milestone 1 
-Calcualte the Background Cosmology.
+Calcualte the Background Cosmology (main code BackgroundCosmology.cpp) of the Universe.
 To run Milestone1.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 #### Milestone 2
-Calculate the Recombination History for our universe. 
+Calculate the Recombination History (main code RecombinationHistory.cpp) for our universe. 
 To run Milestone2.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 #### Milestone 3
-Calculate Perturbations in the metric of the Universe.
+Calculate Perturbations in the metric (main code Perturbations.cpp) of the Universe.
 To run Milestone3.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 #### Milestone 4
-Calculate Powerspectrum of the CMB.
+Calculate Powerspectrum of the CMB (main code PowerSpectrum.cpp).
 To run Milestone4.py, make sure to change/comment out the path of "path" and "savefig_path" in the code.
 
 ## How to install GSL
